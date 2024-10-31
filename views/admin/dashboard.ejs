@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Admin Dashboard</h1>
+
+        <div class="stats">
+            <div class="stat">
+                <h2>Total Products</h2>
+                <p><%= totalProducts %></p>
+            </div>
+            <div class="stat">
+                <h2>Blocked Products</h2>
+                <p><%= blockedProducts %></p>
+            </div>
+            <div class="stat">
+                <h2>Active Products</h2>
+                <p><%= activeProducts %></p>
+            </div>
+        </div>
+
+
+        <div class="actions">
+            <a href="/admin/create" class="action">Create New Product</a>
+            <br>
+
+            <a href="/admin/products" class="action">View All Products</a>
+            <br>
+
+            <a href="/admin/logout" class="action">Logout</a>
+            <br>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+/* Reset some basic elements */
+body, h1, h2, p {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Set basic font styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Container for the dashboard */
+.dashboard-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Title styles */
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Stats section */
+.stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.stat {
+    flex: 1;
+    margin: 0 10px;
+    padding: 15px;
+    background: #ecf0f1;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat h2 {
+    color: #2980b9;
+    margin-bottom: 10px;
+}
+
+/* Action buttons */
+.actions {
+    text-align: center;
+}
+
+.action {
+    display: inline-block;
+    margin: 10px 0;
+    padding: 10px 15px;
+    color: white;
+    background: #2980b9;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+.action:hover {
+    background: #1c598a; /* Darker shade on hover */
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .stats {
+        flex-direction: column;
+    }
+
+    .stat {
+        margin-bottom: 10px;
+    }
+}

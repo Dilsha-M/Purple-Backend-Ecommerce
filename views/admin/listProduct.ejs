@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+</head>
+
+<body>
+    <h2>Product List</h2>
+    <ul class="product-list">
+        <% Products.forEach(product=> { %>
+            <li class="product-item">
+                <strong>Name:</strong>
+                <%= product.name %><br>
+
+                    <strong>Price:</strong> $<%= product.price.toFixed(2) %><br>
+
+                        <strong>Description:</strong>
+                        <%= product.description %><br>
+
+                            <% if (product.image) { %>
+                                <img src="/<%= product.image %>" alt="<%= product.name %>">
+                                <% } %>
+
+                                    <div class="product-actions">
+
+                                        <!-- <a href="/admin/products/<%= product._id %>/edit">Edit</a>
+                                        <br> -->
+
+                                        <a href="/admin/products/<%= product._id %>">Update</a>
+                                        <br>
+
+                                        <form action="/admin/products/<%= product._id %>/block" method="POST"
+                                            style="display:inline;">
+
+
+                                            <button type="submit">
+                                                <%= product.isBlocked ? 'Unblock' : 'Block' %>
+                                            </button>
+
+                                        </form>
+
+                                        <form action="/admin/products/<%= product._id %>?_method=DELETE" method="POST"
+                                            style="display:inline;">
+
+                                            <button type="submit"
+                                                onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
+                                        </form>
+                                    </div>
+            </li>
+            <% }) %>
+    </ul>
+</body>
+
+</html>
