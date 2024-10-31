@@ -133,7 +133,7 @@ const logOut = (req, res) => {
 
             res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
-        
+                                                                                    //hello this is a test
         res.status(500).json({ message: 'Error logging out', error });
     }
 };
