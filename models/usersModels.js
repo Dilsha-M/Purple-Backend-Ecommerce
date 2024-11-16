@@ -12,12 +12,17 @@ const userModels = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: [/.+\@.+\..+/, 'Please fill a valid email address'],
+    match: [/.+\@.+\..+/]
   },
+  phone: {
+    type: Number,
+    required: true,
+  },
+
   password: {
     type: String,
     required: true,
-    minlength: 6,
+    minlength: 6
   },
   role: {
     type: String,
@@ -34,6 +39,12 @@ const userModels = new mongoose.Schema({
   });
 
 
-const User = mongoose.model('User', userModels);
 
-module.exports = User;
+
+// const User = mongoose.model('User', userModels);
+// const Products = mongoose.model('Product', productSchema);
+const User = mongoose.models.User || mongoose.model('User', userModels);
+
+
+
+module.exports = { User};

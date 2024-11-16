@@ -1,19 +1,23 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Product</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h2>Update Product</h2>
+    <h2 class="page-heading">Update Product</h2>
 
-    <!-- Directly send a PUT request without overriding the method -->
     <form action="/admin/products/<%= Product._id %>" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="_method" value="PUT"> <!-- Keeping this line is important for compatibility with routes that expect PUT -->
+        <input type="hidden" name="_method" value="PUT">
         
         <label for="name">Product Name:</label>
         <input type="text" name="name" id="name" value="<%= Product.name %>" required>
+        <br>
+
+        <label for="category">Category:</label>
+        <input type="text" name="category" id="category" value="<%= Product.category %>" required>
         <br>
 
         <label for="description">Description:</label>
@@ -24,10 +28,60 @@
         <input type="number" name="price" id="price" value="<%= Product.price %>" required>
         <br>
 
+        <label for="quantity">Quantity:</label>
+        <input type="number" name="quantity" id="quantity" value="<%= Product.quantity %>" required>
+        <br>
+
         <label for="image">Image:</label>
         <input type="file" name="image" id="image">
         <br>
+
         
+        <button type="submit">Update Product</button>
+    </form>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h2 class="page-heading">Update Product</h2>
+
+    <form action="/admin/products/<%= Product._id %>" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_method" value="PUT">
+
+        <label for="name">Product Name:</label>
+        <input type="text" name="name" id="name" value="<%= Product.name %>" required>
+        <br>
+
+        <label for="category">Category:</label>
+        <input type="text" name="category" id="category" value="<%= Product.category %>" required>
+        <br>
+
+        <label for="description">Description:</label>
+        <textarea name="description" id="description" required><%= Product.description %></textarea>
+        <br>
+
+        <label for="price">Price:</label>
+        <input type="number" name="price" id="price" value="<%= Product.price %>" required>
+        <br>
+
+        <label for="stock">Stock:</label>
+        <input type="number" name="stock" id="stock" value="<%= Product.stock %>" required>
+        <br>
+
+        <label for="image">Image:</label>
+        <input type="file" name="image" id="image">
+        <br>
+
         <button type="submit">Update Product</button>
     </form>
 </body>

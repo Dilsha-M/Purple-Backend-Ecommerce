@@ -1,46 +1,36 @@
-const express=require('express')
-const router =express.Router();
-const upload=require('../middleware/multer')
+const express = require('express')
+const router = express.Router();
+const upload = require('../middleware/multer')
+const { Admin, Product, Category, SubCategory } = require('../models/adminModels');
 
 
-const { adminLogin,dashBorad,createProduct,updateProduct,deleteProduct,listProducts,logOut}=require('../controller/adminController');
-const { Product } = require('../models/adminModels');
+const { adminLogin, dashboard, createProduct, updateProduct, deleteProduct, listProducts, blockedProducts, logOut,listCategories,createCategory,updateCategory,deleteCategory,listSubCategories,createSubCategory,updateSubCategory,deleteSubCategory} = require('../controller/adminController');
 
 
 
 router.route('/login')
-.get((req,res)=>{
-    res.render('admin/adminLogin')
-})
-.post(async (req,res)=>{
-    adminLogin(req,res)
-})
+    .get((req, res) => {
+        res.render('admin/adminLogin', { error: "" })
+    })
+    .post(async (req, res) => {
+        adminLogin(req, res)
+    })
 
 
 
 router.route('/dashboard')
-.get(dashBorad)
+    .get(dashboard)
 
 
 router.route('/create')
-.get((req,res)=>{
-    res.render('admin/createProduct')
-})
-.post(upload.single('image'),(req,res)=>{
-    createProduct(req,res)
-})
 
-
-
-// router.route('/product/:productId')
-// .get((req,res)=>{
-//     res.render('admin/updateProduct',{Product})
-// })
-// .put(upload.single('image'), async (req,res)=>{
-//     updateProduct(req,res)
-// })
-// .delete(deleteProduct)
-
+    .get(async(req, res) => {
+        const categories = await Category.find().populate('subCategories')
+        res.render('admin/createProduct',{categories})
+    })
+    .post(upload.single('image'), (req, res) => {
+        createProduct(req, res)
+    })
 
 
 
@@ -48,35 +38,114 @@ router.route('/products/:productId')
     .get(async (req, res) => {
         const product = await Product.findById(req.params.productId);
         if (!product) return res.status(404).send('Product not found');
+
         res.render('admin/updateProduct', { Product: product });
     })
-    .put(upload.single('image'), updateProduct) // Handle PUT requests for updating
-    .delete(deleteProduct); // Handle DELETE requests for deleting
+    .post(upload.single('image'), updateProduct)
 
 
 
 
-
-router.route('/product/:productId')
-.delete(async (req,res)=>{
-    deleteProduct(req,res)
-})
-
+router.route('/product/delete/:productId')
+    .post(deleteProduct)
 
 
 
 
 router.route('/products')
-.get((req,res)=>{
-    listProducts(req,res)
-})
-// .post(async (req,res)=>{
-//     listProducts(req,res)
-// })
+    .get((req, res) => {
+        listProducts(req, res)
+    })
+
+
+    
+router.route('/products/:productId/block')
+    .post((req, res) => { blockedProducts(req, res) })
+
 
 router.route('/logout')
-.get(logOut);
+    .get(logOut);
+
+
+//categoeries//
+
+router.route('/categories')
+    .get(async (req, res) => {
+        const categories = await Category.find().populate('subCategories');
+        res.render('admin/listCategories',
+             { categories });
+    })
+    .post(createCategory);
 
 
 
-module.exports=router
+    router.route('/categories/:categoryId/edit')
+    .get(async (req, res) => {
+        try {
+         
+            const category = await Category.findById(req.params.categoryId);
+            if (!category) {
+                return res.status(404).send('Category not found');
+            }
+          
+            res.render('admin/editCategory',
+                 { category });
+        } catch (error) {
+            res.status(500).send('Error fetching category for editing');
+        }
+    })
+    .post(updateCategory);
+
+
+    router.route('/create-category')
+    .get((req, res) => {
+        res.render('admin/createCategory'); 
+    })
+    .post(createCategory); 
+
+    router.route('/categories/:categoryId/delete')
+    .get(deleteCategory);
+
+
+
+//subcategories//
+
+router.route('/subcategories')
+.get(async (req, res) => {
+    const subCategories = await SubCategory.find().populate('parentCategory', 'name');
+    res.render('admin/listSubCategories', { subCategories });
+});
+
+
+router.route('/create-subcategory')
+    .get(async (req, res) => {
+        const categories = await Category.find();
+        res.render('admin/createSubCategory', { categories });
+    })
+    .post(createSubCategory);
+
+
+    router.route('/update-subcategory/:subcategoryId')
+    .get(async (req, res) => {
+        const { subcategoryId } = req.params;  
+        const subCategory = await SubCategory.findById(subcategoryId).populate('parentCategory'); 
+       
+        const categories = await Category.find();
+
+     
+        res.render('admin/updateSubCategory', { subCategory, categories });
+    })
+
+    .post(updateSubCategory); 
+
+
+// router.route('/subcategories/:subcategoryId/delete')
+//     .post(deleteSubCategory);
+
+
+router.route('/subcategories/:subcategoryId/delete')
+    .get(deleteSubCategory)
+    .post(deleteSubCategory);
+
+
+module.exports = router

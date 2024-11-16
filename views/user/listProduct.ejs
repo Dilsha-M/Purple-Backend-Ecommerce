@@ -1,0 +1,79 @@
+
+  <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <title>Product List</title>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h3>Navigation</h3>
+        <a href="/user/cart">Go to Cart</a>
+        <a href="/user/wishlist">Go to Wishlist</a>
+    </div>
+
+
+    <div class="product-container">
+        <h1>Product List</h1>
+
+     
+        <form action="/user/products" method="get">
+            <div>
+                <label for="name">Filter by name:</label>
+                <input type="text" id="name" name="name" placeholder="Product name">
+            </div>
+
+            <div>
+                <label for="minPrice">Min Price:</label>
+                <input type="number" id="minPrice" name="minPrice" placeholder="Min price" min="1">
+            </div>
+
+            <div>
+                <label for="maxPrice">Max Price:</label>
+                <input type="number" id="maxPrice" name="maxPrice" placeholder="Max price">
+            </div>
+
+            <button type="submit">Filter</button>
+        </form>
+
+        <div class="product-list">
+            <% if (products.length > 0) { %>
+                <% products.forEach(product => { %>
+                    <div class="product-item">
+                        <h2><%= product.name %></h2>
+                        <p><%= product.description %></p>
+                        <p><strong>Price: $<%= product.price %></strong></p>
+
+                        
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                      
+
+                        <a href="/user/product/<%= product._id %>">View Details</a>
+
+                  
+                        <form action="/user/add-to-cart/<%= product._id %>" method="POST">
+                            <label for="quantity-<%= product._id %>">Quantity:</label>
+                            <input type="number" id="quantity-<%= product._id %>" name="quantity" value="1" min="1" style="width: 60px;">
+                            <button type="submit">Add to Cart</button>
+                        </form>
+
+                    
+                        <form action="/user/add-to-wishlist/<%= product._id %>" method="POST">
+                            <button type="submit">Add to Wishlist</button>
+                        </form>
+                    </div>
+                    <br>
+                <% }) %>
+            <% } else { %>
+                <p>No products available at the moment.</p>
+            <% } %>
+        </div>
+    </div>
+</body>
+
+</html>

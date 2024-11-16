@@ -1,0 +1,208 @@
+
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <title>Modern Login Page</title>
+</head>
+
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-up">
+          
+            <form action="/user/register" method="POST" onsubmit="return validateForm()">
+                <h1>Register</h1>
+
+             
+                <div>
+                    <input type="text" name="username" id="username" placeholder="Username">
+                    <span id="username-err" class="error-msg" style="display: none; color: red;">Username is required</span>
+                </div>
+
+                <div>
+                    <input type="email" name="email" id="email" placeholder="Email">
+                    <span id="email-err" class="error-msg" style="display: none; color: red;">Email is required</span>
+                </div>
+ 
+               
+                <div>
+                    <input type="number" name="phone" id="phone" placeholder="Phone number">
+                    <span id="phone-err" class="error-msg" style="display: none; color: red;">Phone number is required</span>
+                </div>
+
+                <div>
+                    <input type="password" name="password" id="password" placeholder="Password">
+                    <span id="password-err" class="error-msg" style="display: none; color: red;">Password is required</span>
+                </div>
+
+                <% if (error) { %>
+                <p id="register-error" aria-live="polite" style="color: red;">
+                    <%= error %>
+                </p>
+                <% } %>
+
+                <button type="submit">Register</button>
+            </form>
+        </div>
+
+
+        <div class="form-container sign-in">
+            <form action="/user/login" method="POST" onsubmit="return validateLoginForm()"> 
+                <h1>Login</h1>
+                <div>
+                    <input type="email" name="email" id="login-email" placeholder="Email">
+                    <span id="login-email-err" class="error-msg" style="display: none; color: red;">Email is required</span>
+                </div>
+                <div>
+                    <input type="password" name="password" id="login-password" placeholder="Password">
+                    <span id="login-password-err" class="error-msg" style="display: none; color: red;">Password is required</span>
+                </div>
+                <a href="/user/forgetpassword">Forgot Your Password?</a>
+                <button type="submit">Login</button>
+            </form>
+        </div> 
+
+       
+
+
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Welcome Back!</h1>
+                    <p>Enter your personal details to use all site features</p>
+                    <button class="hidden" id="login">Login</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>Hello, Friend!</h1>
+                    <p>Register with your personal details to enjoy all site features</p>
+                    <button class="hidden" id="register">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const registerBtn = document.getElementById('register');
+        const loginBtn = document.getElementById('login');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+
+        registerBtn.addEventListener('click', () => {
+            container.classList.add("active");
+            loginError.style.display = "none";
+            registerError.style.display = "block";
+        });
+
+        loginBtn.addEventListener('click', () => {
+            container.classList.remove("active");
+            registerError.style.display = "none";
+            loginError.style.display = "block";
+        });
+
+        const activeForm = "<%= activeForm %>";
+        if (activeForm === 'register') {
+            container.classList.add("active");
+        } else {
+            container.classList.remove("active");
+        }
+
+        function validateForm() {
+            let isValid = true;
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            const usernameErr = document.getElementById('username-err');
+            const emailErr = document.getElementById('email-err');
+            const phoneErr = document.getElementById('phone-err');
+            const passwordErr = document.getElementById('password-err');
+
+       
+            if (!username) {
+                usernameErr.style.display = 'block';
+                isValid = false;
+            } else {
+                usernameErr.style.display = 'none';
+            }
+
+           
+            if (!email) {
+                emailErr.style.display = 'block';
+                isValid = false;
+            } else {
+                emailErr.style.display = 'none';
+            }
+
+       
+            if (!phone) {
+                phoneErr.style.display = 'block';
+                isValid = false;
+            } else {
+                phoneErr.style.display = 'none';
+            }
+
+ 
+            if (!password) {
+                passwordErr.style.display = 'block';
+                isValid = false;
+            } else {
+                passwordErr.style.display = 'none';
+            }
+
+           
+            return isValid;
+        }
+
+
+
+
+
+        function validateLoginForm() {
+                let isValid = true;
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value.trim();
+
+              
+                if (!email) {
+                    document.getElementById('login-email-err').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('login-email-err').style.display = 'none';
+                }
+
+              
+                if (!password) {
+                    document.getElementById('login-password-err').style.display = 'block';
+                    isValid = false;
+                } else {
+                    document.getElementById('login-password-err').style.display = 'none';
+                }
+
+                return isValid;
+            }
+
+    
+
+
+    
+
+    </script>
+</body>
+
+</html>  
+
+
+
+
+
+
+
+
+ 

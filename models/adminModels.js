@@ -22,7 +22,7 @@ const adminModels = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: [ 'admin'],
+        enum: ['admin'],
         default: 'admin'
     }
 }, {
@@ -45,25 +45,76 @@ const productSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: true,
-        min: 0
+        min: [0.01, 'Price must be greater than zero'],
+        validate: {
+            validator: function (value) {
+
+                return value <= 1000000;
+            },
+            message: 'Price should not exceed 1,000,000'
+        }
     },
     category: {
-        type: String,
-        // required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Category",
+        required: true,
         trim: true
     },
     image: {
-        type: String,
-        // required: true
+        type: [String],
+        required: true
     },
     isBlocked: {
         type: Boolean,
         default: false
     },
+    stock: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: [9999, 'Stock cannot exceed 1000']
+
+    }
 }, {
     timestamps: true
 })
 
+
+const categorySchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    subCategories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SubCategory'
+    }]
+});
+
+const subCategorySchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    parentCategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
+    }
+}, {
+    timestamps: true
+});
+
+
+
+
+
+
 const Admin = mongoose.model('Admin', adminModels);
 const Product = mongoose.model('Product', productSchema);
-module.exports = { Admin, Product }
+const Category = mongoose.model('Category', categorySchema)
+const SubCategory = mongoose.model('SubCategory', subCategorySchema)
+
+
+module.exports = { Admin, Product, Category, SubCategory, }

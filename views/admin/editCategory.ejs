@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Category</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h2>Edit Category</h2>
+    <form action="/admin/categories/<%= category._id %>/edit" method="POST">
+        <div>
+            <label for="name">Category Name:</label>
+            <input type="text" id="name" name="name" value="<%= category.name %>" required>
+        </div>
+        <button type="submit">Update Category</button>
+    </form>
+    <br>
+    <a href="/admin/categories">Back to Categories</a>
+</body>
+</html>

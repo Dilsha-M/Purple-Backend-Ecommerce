@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,16 +8,21 @@
     <title>OTP Verification</title>
     <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
     <div class="header-box">  
         <h1>Purple</h1>
     </div>
-    <h3>OTP Verification</h3>
-    <form action="/users/verifyotp" method="POST">
-        <label for="otp">Enter the OTP sent to your email:</label>
-        <input type="text" id="otp" name="user_otp" required>
-        <button type="submit">Verify OTP</button>
-    </form>
-    <p>Did not receive the OTP? <a href="/user/forgetpassword">Resend OTP</a>.</p>
+    <div class="otp-container">
+        <h3>OTP Verification</h3>
+        <form action="/user/verifyotp" method="POST">
+            <label for="otp">Enter the OTP sent to your email:</label>
+            <input type="text" id="otp" name="user_otp" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+        <p>Did not receive the OTP? <a href="/user/forgetpassword">Resend OTP</a>.</p>
+        <p><%= error || '' %></p>
+    </div>
 </body>
 </html>
+

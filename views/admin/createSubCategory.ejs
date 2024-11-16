@@ -1,0 +1,160 @@
+
+ <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create SubCategory</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f6f7;
+            color: #333;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: #0f5132;
+            padding: 20px;
+            color: #fff;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar h1 {
+            color: #ffffff;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .actions a {
+            display: block;
+            padding: 10px;
+            margin: 10px 0;
+            color: #fff;
+            text-decoration: none;
+            background-color: #1c7430;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar .actions a:hover {
+            background-color: #154c24;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            margin-left: 270px;
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        h2 {
+            color: #0f5132;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #0f5132;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #154c24;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h1>Admin Dashboard</h1>
+        <div class="actions">
+            <a href="/admin/create">Create New Product</a>
+            <a href="/admin/products">View All Products</a>
+            <a href="/admin/create-category">Create New Category</a>
+            <a href="/admin/categories">View All Categories</a>
+            <a href="/admin/create-subcategory">Create New Subcategory</a>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
+
+ 
+    <div class="dashboard-content">
+        <h2>Create SubCategory</h2>
+
+      
+        <form action="/admin/create-subcategory" method="POST">
+            <label for="name">SubCategory Name:</label>
+            <input type="text" name="name" id="name" required>
+
+            <label for="categoryId">Category:</label>
+            <select name="categoryId" id="categoryId" required>
+                <option value="">Select Category</option>
+                <% categories.forEach(category => { %>
+                    <option value="<%= category._id %>"><%= category.name %></option>
+                <% }) %>
+            </select>
+
+            <div class="form-actions">
+                <button type="submit">Create SubCategory</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+
+</html>

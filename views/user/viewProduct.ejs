@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
+    <title>Product Details</title>
+</head>
+
+<body>
+    <div class="product-details">
+        <h1><%= product.name %></h1>
+        <p><%= product.description %></p>
+        <p><strong>Price: $<%= product.price %></strong></p>
+
+        <% if (product.image) { %>
+            <img src="/productImages/<%= product.image %>" alt="<%= product.name %>" class="product-image">
+
+        <% } %>
+
+        <a href="/user/products">Back to Product List</a>
+    </div>
+</body>
+
+</html>

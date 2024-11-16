@@ -1,33 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Product</title>
-    <link rel="stylesheet" href="/admin.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f6f7;
+            color: #333;
+        }
+
+
+        .sidebar {
+            width: 250px;
+            background-color: #0f5132;
+            padding: 20px;
+            color: #fff;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .sidebar h1 {
+            color: #ffffff;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .actions a {
+            display: block;
+            padding: 10px;
+            margin: 10px 0;
+            color: #fff;
+            text-decoration: none;
+            background-color: #1c7430;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar .actions a:hover {
+            background-color: #154c24;
+        }
+
+
+        .form-container {
+            margin-left: 270px;
+            padding: 40px;
+            flex-grow: 1;
+        }
+
+        .form-container h2 {
+            font-size: 1.8em;
+            color: #0f5132;
+            margin-bottom: 20px;
+        }
+
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            font-size: 1em;
+            color: #333;
+            margin-top: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        input[type="file"] {
+            padding: 3px;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
+
+        button[type="submit"] {
+            background-color: #0f5132;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1c7430;
+        }
+
+        .error-message {
+            font-size: 0.85em;
+            color: red;
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Create Product</h2>
 
-    <form action="/admin/create" method="POST" enctype="multipart/form-data">
+    <div class="sidebar">
+        <h1>Admin Dashboard</h1>
+        <div class="actions">
+            <a href="/admin/create">Create New Product</a>
+            <a href="/admin/products">View All Products</a>
+            <a href="/admin/create-category">Create New Category</a>
+            <a href="/admin/categories">View All Categories</a>
+            <a href="/admin/create-subcategory">Create New Subcategory</a>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
 
-        <label for="name">Product Name:</label>
-        <input type="text" name="name" id="name" required>
-        <br>
 
-        <label for="description">Description:</label>
-        <textarea name="description" id="description" required></textarea>
-        <br>
+    <div class="form-container">
+        <h2 class="page-heading">Create Product</h2>
 
-        <label for="price">Price:</label>
-        <input type="number" name="price" id="price" required>
-        <br>
+        <form action="/admin/create" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <label for="name">Product Name:</label>
+            <input type="text" name="name" id="name">
+            <span id="name-error" class="error-message">Product name is required</span>
 
-        <label for="image">Image:</label>
-        <input type="file" name="image" id="image" required>
-        <br>
+
+
+            <label for="category">Category:</label>
+            <select name="category" id="category" onchange="updateSubcategories()">
+                <option value="">Select Category</option>
+                <% if (categories && categories.length> 0) { %>
+                    <% categories.forEach(category=> { %>
+                        <option value="<%= category._id %>">
+                            <%= category.name %>
+                        </option>
+                        <% }); %>
+                            <% } else { %>
+                                <option disabled>No categories available</option>
+                                <% } %>
+            </select>
+            <span id="category-error" class="error-message">Category is required</span>
+
+
+            <label for="subcategory">Subcategory:</label>
+            <select name="subcategory" id="subcategory">
+                <option value="">Select Subcategory</option>
+                <% categories.forEach(category=> { %>
+                    <% category.subCategories.forEach(subCategory=> { %>
+                        <option value="<%= subCategory._id %>">
+                            <%= subCategory.name %>
+                        </option>
+                        <% }); %>
+                            <% }); %>
+            </select>
+            <span id="subcategory-error" class="error-message">Subcategory is required</span>
+
+
+            <label for="description">Description:</label>
+            <textarea name="description" id="description"></textarea>
+            <span id="description-error" class="error-message">Description is required</span>
+    
+
+            <label for="price">Price:</label>
+            <input type="number" name="price" id="price" step="1" min="1" max="100000">
+            <span id="price-error" class="error-message">Price is required</span>
+            <span id="price-limit-error" class="error-message">Price cannot exceed 100000</span>
+
+
+            <label for="stock">Stock:</label>
+            <input type="number" name="stock" id="stock" min="1" max="1000">
+            <span id="stock-error" class="error-message">Stock is required</span>
+
+
+            <label for="image">Image:</label>
+            <input type="file" name="image" id="image">
+            <span id="image-error" class="error-message">Image is required</span>
+
+            <button type="submit">Create Product</button>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            let isValid = true;
+            
+            
+            const name = document.getElementById('name').value.trim();
+            const category = document.getElementById('category').value.trim();
+            const subcategory = document.getElementById('subcategory').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const stock = document.getElementById('stock').value.trim();
+            const image = document.getElementById('image').value.trim();
+    
+         
+            document.getElementById('name-error').style.display = name ? 'none' : 'block';
+    
+       
+            document.getElementById('category-error').style.display = category ? 'none' : 'block';
+    
+          
+            document.getElementById('subcategory-error').style.display = subcategory ? 'none' : 'block';
+    
+          
+            document.getElementById('description-error').style.display = description ? 'none' : 'block';
+
+
+   
+     if (!price || isNaN(price) || price <= 0) {
+            document.getElementById('price-error').style.display = 'block'; 
+            document.getElementById('price-limit-error').style.display = 'none';  
+            isValid = false;
+        } else if (price > 100000) {
+            document.getElementById('price-error').style.display = 'none';
+            document.getElementById('price-limit-error').style.display = 'block';  
+            isValid = false;
+        } else {
+            document.getElementById('price-error').style.display = 'none';
+            document.getElementById('price-limit-error').style.display = 'none';
+        }
+    
+            
+            const stockValue = parseInt(stock);
+            if (!stock || stockValue <= 0 || stock > 1000) {
+                document.getElementById('stock-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('stock-error').style.display = 'none';
+            }
+    
+            
+            document.getElementById('image-error').style.display = image ? 'none' : 'block';
+    
         
-        <button type="submit">Create Product</button>
-    </form>
+            isValid = isValid && name && category && subcategory && description && price && stock && image;
+            
+            return isValid;
+        }
+    </script>
+    
 </body>
+
 </html>

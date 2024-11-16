@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Wishlist</title>
+</head>
+<body>
+    <h1>Your Wishlist</h1>
+
+    <% if (wishlist && wishlist.length > 0) { %>
+        <ul>
+            <% wishlist.forEach(function(product) { %>
+                <li>
+                    <h2><%= product.name %></h2>
+                    <img src="/productImages/<%= product.image %>" alt="<%= product.name %>" width="100" height="100">
+                    <p>Price: $<%= product.price %></p>
+                    <form action="/user/remove-from-wishlist/<%= product._id %>" method="POST">
+                        <button type="submit">Remove from Wishlist</button>
+                    </form>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <p>Your wishlist is empty.</p>
+    <% } %>
+
+</body>
+</html>

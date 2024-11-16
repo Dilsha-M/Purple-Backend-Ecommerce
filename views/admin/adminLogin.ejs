@@ -1,27 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
-   <link rel="stylesheet" href="/admin.css">
-</head>
-<body>
-    <div class="login-container">
-        <h3>Admin Login</h3>
-        
-        <form action="/admin/login" method="POST">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+      
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
+        body {
+            background-color: #f4f6f7;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .login-container {
+            background-color: #fff;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container h3 {
+            margin-bottom: 30px;
+            font-size: 2em;
+            color: #0f5132;
+        }
+
+        label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        button {
+            width: 100%;
+            background-color: #0f5132;
+            color: #fff;
+            padding: 12px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #154c24;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+      
+        @media (max-width: 500px) {
+            .login-container {
+                padding: 20px;
+            }
+
+            .login-container h3 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <h3>Login</h3>
+
+        <form action="/admin/login" method="POST" onsubmit="return validateForm()">
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            <br>
+            <input type="email" id="email" name="email" placeholder="Enter your email">
+            <div id="email-error" class="error-message" style="display: none;">Email is required</div>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            <br>
-            
+            <input type="password" id="password" name="password" placeholder="Enter your password">
+            <div id="password-error" class="error-message" style="display: none;">Password is required</div>
+
+            <% if (error) { %>
+                <div class="error-message">
+                    <%= error %>
+                </div>
+            <% } %>
+
             <button type="submit">Login</button>
         </form>
     </div>
+
+    <script>
+        function validateForm() {
+            let isValid = true;
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const emailError = document.getElementById('email-error');
+            const passwordError = document.getElementById('password-error');
+
+       
+            emailError.style.display = 'none';
+            passwordError.style.display = 'none';
+
+        
+            if (emailField.value.trim() === '') {
+                emailError.style.display = 'block';
+                isValid = false;
+            }
+
+      
+            if (passwordField.value.trim() === '') {
+                passwordError.style.display = 'block';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+    </script>
+
 </body>
+
 </html>
