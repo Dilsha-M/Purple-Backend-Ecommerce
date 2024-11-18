@@ -3,37 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/style.css">
     <title>Your Cart</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="cart-container">
-        <h1>Your Cart</h1>
+    <h1>Your Shopping Cart</h1>
 
-        <% if (cart && cart.length > 0) { %>
-            <ul>
-                <% cart.forEach(item => { %>
-                    <li>
-                        <h3><%= item.product.name %></h3>
-                        <p><%= item.product.description %></p>
-                        <p><strong>Price: $<%= item.product.price %></strong></p>
-                        <p>Quantity: <%= item.quantity %></p>
-                        <form action="/user/remove-from-cart/<%= item.product._id %>" method="POST">
-                            <button type="submit">Remove</button>
-                        </form>
-                    </li>
-                <% }) %>
-            </ul>
+    <% if (cart && cart.items && cart.items.length > 0) { %>
+        <ul>
+            <% cart.items.forEach(function(cartItem) { %>
+                <li>
+                    <h2><%= cartItem.product.name %></h2>
+                    <img src="/productImages/<%= cartItem.product.image %>" alt="<%= cartItem.product.name %>" width="150" height="150">
+                    <p>Price: $<%= cartItem.product.price %></p>
+                    <p><%= cartItem.product.description %></p>
+                    <p>Quantity: <%= cartItem.quantity %></p>
+                    <p>Total: $<%= (cartItem.product.price * cartItem.quantity).toFixed(2) %></p>
 
-            <h3>Total: $<%= total %></h3>
-            <form action="/user/clear-cart" method="POST">
-                <button type="submit">Clear Cart</button>
-            </form>
-        <% } else { %>
-            <p>Your cart is empty!</p>
-        <% } %>
+                    <!-- Form to remove item from cart -->
+                    <form action="/user/remove-from-cart/<%= cartItem.product._id %>" method="POST">
+                        <button type="submit">Remove from Cart</button>
+                    </form>
+                </li>
+            <% }) %>
+        </ul>
 
-        <a href="/user/products">Back to Product List</a>
-    </div>
+        <!-- Display the total price of all items -->
+        <h3>Total: $<%= cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0).toFixed(2) %></h3>
+
+        <!-- Proceed to Checkout -->
+        <a href="/user/checkout">
+            <button>Proceed to Checkout</button>
+        </a>
+
+    <% } else { %>
+        <p>Your cart is empty.</p>
+    <% } %>
+
+    <!-- Link to continue shopping -->
+    <a href="/user/products">Continue Shopping</a>
+
 </body>
 </html>

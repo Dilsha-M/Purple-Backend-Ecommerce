@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router()
 
-const { registerUser, loginUser, forgetPassword, verifyOTP, resetPassword,listProducts, getProductDetails,addToCart,removeFromCart,clearCart,addToWishlist,removeFromWishlist,getWishlist} = require('../controller/userController.js')
 
+const { registerUser, loginUser, forgetPassword, verifyOTP, resetPassword,listProducts, getProductDetails,addToCart,updateCart,getCart,removeFromCart,clearCart,addToWishlist,removeFromWishlist,getWishlist} = require('../controller/userController.js')
+
+const verifyJWT = require('../middleware/jwtMiddleware.js');
+const { Product } = require('../models/adminModels.js');
+const { Cart, User } = require('../models/usersModels.js');
 
 
 
@@ -54,53 +58,60 @@ router.route('/resetpassword')
         resetPassword(req, res)
     })
 
+//////////////////
 
-    router.route('/products')
-    .get(listProducts);
+router.route('/products')
+    .get(verifyJWT, listProducts);
 
-    router.route('/product/:id')
-    .get(getProductDetails);
+router.route('/product/:id')
+    .get(verifyJWT, getProductDetails);
 
+router.route('/cart')
+    .get(verifyJWT, (req, res) => {
+        const user_id=req.user.id
+        console.log(user_id);
+        
+       const cart=User.findOne({user:user_id}).populate('items.product')
 
-    router.route('/cart')
-    .get((req, res) => {
-        const cart = req.cookies.cart ? JSON.parse(req.cookies.cart) : [];
-        const total = req.cookies.total || 0;
-        res.render('user/cart', { cart, total });
+        res.render('user/cart', {cart});
     });
 
-    router.route('/add-to-cart/:id')
-    .post(async (req, res) => {
+router.route('/add-to-cart/:id')
+    .post(verifyJWT, async (req, res) => {
         await addToCart(req, res);
     });
 
+  
 
-    router.route('/remove-from-cart/:id')
-    .post(async (req, res) => {
+
+router.route('/update-cart/:id')
+    .post(verifyJWT, async (req, res) => {
+        await updateCart(req, res);
+    });
+
+router.route('/remove-from-cart/:id')
+    .post(verifyJWT, async (req, res) => {
         removeFromCart(req, res);
     });
 
-
-    router.route('/clear-cart')
-    .post((req, res) => {
+router.route('/clear-cart')
+    .post(verifyJWT, (req, res) => {
         clearCart(req, res);
     });
 
 
-    router.route('/wishlist')
-    .get(getWishlist);
+
+
+router.route('/wishlist')
+    .get(verifyJWT, getWishlist); 
 
 
 router.route('/add-to-wishlist/:id')
-.post(async (req, res) => {
-    await addToWishlist(req, res);
-});
+    .post(verifyJWT, addToWishlist); 
 
 
 router.route('/remove-from-wishlist/:id')
-.post(async (req, res) => {
-    removeFromWishlist(req, res);
-});
+    .post(verifyJWT, removeFromWishlist); 
 
 
 
