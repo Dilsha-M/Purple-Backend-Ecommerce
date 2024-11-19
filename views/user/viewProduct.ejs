@@ -15,8 +15,7 @@
         <p><strong>Price: $<%= product.price %></strong></p>
 
         <% if (product.image) { %>
-            <img src="/productImages/<%= product.image %>" alt="<%= product.name %>" class="product-image">
-
+            <img src="<%= product.image %>" alt="<%= product.name %>" width="150" height="150">
         <% } %>
 
         <a href="/user/products">Back to Product List</a>

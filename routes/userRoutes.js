@@ -66,14 +66,11 @@ router.route('/products')
 router.route('/product/:id')
     .get(verifyJWT, getProductDetails);
 
-router.route('/cart')
-    .get(verifyJWT, (req, res) => {
-        const user_id=req.user.id
-        console.log(user_id);
-        
-       const cart=User.findOne({user:user_id}).populate('items.product')
 
-        res.render('user/cart', {cart});
+
+router.route('/cart')
+    .get(verifyJWT,(req, res) => {
+      getCart(req,res)
     });
 
 router.route('/add-to-cart/:id')
@@ -84,15 +81,18 @@ router.route('/add-to-cart/:id')
   
 
 
-router.route('/update-cart/:id')
+    router.route('/cart/update-cart/:id')
     .post(verifyJWT, async (req, res) => {
-        await updateCart(req, res);
+      await updateCart(req, res);
+    });
+  
+
+    router.route('/remove-from-cart/:id')
+    .post(verifyJWT, async (req, res) => {
+        await removeFromCart(req, res);
     });
 
-router.route('/remove-from-cart/:id')
-    .post(verifyJWT, async (req, res) => {
-        removeFromCart(req, res);
-    });
+
 
 router.route('/clear-cart')
     .post(verifyJWT, (req, res) => {

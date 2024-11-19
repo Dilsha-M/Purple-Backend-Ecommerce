@@ -3,45 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Shopping Cart</title>
 </head>
 <body>
-    <h1>Your Shopping Cart</h1>
+    <div class="container">
+        <h1>Your Shopping Cart</h1>
 
-    <% if (cart && cart.items && cart.items.length > 0) { %>
-        <ul>
-            <% cart.items.forEach(function(cartItem) { %>
-                <li>
-                    <h2><%= cartItem.product.name %></h2>
-                    <img src="/productImages/<%= cartItem.product.image %>" alt="<%= cartItem.product.name %>" width="150" height="150">
-                    <p>Price: $<%= cartItem.product.price %></p>
-                    <p><%= cartItem.product.description %></p>
-                    <p>Quantity: <%= cartItem.quantity %></p>
-                    <p>Total: $<%= (cartItem.product.price * cartItem.quantity).toFixed(2) %></p>
+        <% if (cart && Array.isArray(cart.items) && cart.items.length > 0) { %>
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                       <th>image</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% cart.items.forEach(item => { %>
+                        <tr>
+                            <td><%= item.product.name %></td>
+                            <td>
+                                <form action="/user/cart/update-cart/<%= item.product._id %>" method="POST">
+                                    <input 
+                                        type="number" 
+                                        name="quantity" 
+                                        value="<%= item.quantity %>" 
+                                        min="1" 
+                                        class="quantity-input"
+                                    >
+                                    <button type="submit">Update</button>
+                                </form>
+                                
+                            </td>
+                            <td><img src="<%= item.product.image %>"width="150" height="150" alt=""></td>
+                            
+                            <td>$<%= item.product.price %></td>
+                            <td>$<%= item.product.price * item.quantity %></td>
+                            <td>
+                                <form action="/user/remove-from-cart/<%= item.product._id %>" method="post">
 
-                    <!-- Form to remove item from cart -->
-                    <form action="/user/remove-from-cart/<%= cartItem.product._id %>" method="POST">
-                        <button type="submit">Remove from Cart</button>
-                    </form>
-                </li>
-            <% }) %>
-        </ul>
+                                    <button type="submit">Remove</button>
+                                </form>
+                                
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p class="empty-cart-message">Your cart is empty.</p>
+        <% } %>
+    </div>
 
-        <!-- Display the total price of all items -->
-        <h3>Total: $<%= cart.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0).toFixed(2) %></h3>
-
-        <!-- Proceed to Checkout -->
-        <a href="/user/checkout">
-            <button>Proceed to Checkout</button>
-        </a>
-
-    <% } else { %>
-        <p>Your cart is empty.</p>
-    <% } %>
-
-    <!-- Link to continue shopping -->
-    <a href="/user/products">Continue Shopping</a>
-
+    <div class="cart-footer">
+        <a href="/user/products">Go back</a>
+    </div>
 </body>
-</html>
+</html> 
+
+
+
+
+
+
+
+ 
