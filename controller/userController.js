@@ -249,7 +249,7 @@ const addToCart = async (req, res) => {
 
 const getCart = async (req, res) => {
     const userId = req.user?.id; 
-    console.log(userId);
+ 
 
     try {
        
@@ -266,7 +266,7 @@ const getCart = async (req, res) => {
        
         res.render('user/cart', { cart });
     } catch (error) {
-        console.error("Error fetching cart:", error);
+      
         res.status(500).send("Error fetching cart");
     }
 };

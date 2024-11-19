@@ -79,9 +79,6 @@ const wishlistSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-
-// const User = mongoose.model('User', userModels);
-
 const User = mongoose.models.User || mongoose.model('User', userModels);
 const Cart = mongoose.model('Cart', cartSchema);
 const Wishlist = mongoose.model('Wishlist', wishlistSchema);
