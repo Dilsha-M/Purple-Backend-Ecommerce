@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/style.css">
     <title>Product Details</title>
 </head>
-
 <body>
     <div class="product-details">
         <h1><%= product.name %></h1>
@@ -15,11 +13,34 @@
         <p><strong>Price: $<%= product.price %></strong></p>
 
         <% if (product.image) { %>
-            <img src="<%= product.image %>" alt="<%= product.name %>" width="150" height="150">
+            <img src="<%= product.image %>" alt="<%= product.name %>" width="300" height="300">
         <% } %>
 
-        <a href="/user/products">Back to Product List</a>
+
+        <% if (product.stock > 0) { %>
+            <% if (product.stock < 5) { %>
+                <p style="color: red; font-weight: bold;">Limited Stock: <%= product.stock %> items left</p>
+            <% } else { %>
+                <p style="color: green; font-weight: bold;">In Stock: <%= product.stock %> items available</p>
+            <% } %>
+        <% } else { %>
+            <p style="color: red; font-weight: bold;">Out of Stock</p>
+        <% } %>
+        
+      
+        <form action="/user/add-to-cart/<%= product._id %>" method="POST">
+          
+            <input type="hidden" name="productId" value="<%= product._id %>">
+            <button type="submit" class="btn">Add to Cart</button>
+        </form>
+
+    
+        <form action="/user/add-to-wishlist/<%= product._id %>" method="POST">
+            <button type="submit" class="btn">Add to Wishlist</button>
+        </form>
+
+        <a href="/user/products" class="btn">Back to Product List</a>
     </div>
 </body>
-
 </html>
+

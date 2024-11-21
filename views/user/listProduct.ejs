@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,94 +5,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/style.css">
-    <title>Product List</title>
+    <title>E-Commerce | Purple</title>
 </head>
 
 <body>
-
-
-    <div class="sidebar">
-        <h3>Navigation</h3>
-        <a href="/user/cart">Go to Cart</a>
-        <a href="/user/wishlist">Go to Wishlist</a>
-    </div>
-
-    
-    <div class="product-container">
-        <h1>Product List</h1>
-
-       
-        <form action="/user/products" method="get" class="filter-form">
-            <div>
-                <label for="name">Filter by name:</label>
-                <input type="text" id="name" name="name" placeholder="Product name">
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="/">
+                    <h1>Purple</h1>
+                </a>
             </div>
-
-            <div>
-                <label for="minPrice">Min Price:</label>
-                <input type="number" id="minPrice" name="minPrice" placeholder="Min price" min="1">
+            <nav class="nav">
+                <ul>
+                    <li><a href="/user/products">Home</a></li>
+                    <li><a href="/user/cart">Your Cart <span class="badge"><%= cartCount %></span></a></li> 
+                    <li><a href="/user/wishlist">Your Wishlist <span class="badge"><%= wishlistCount %></span></a></li> 
+                    <li><a href="/user/account">My Account</a></li>
+                    <li><a href="/user/about">About</a></li>
+                    <li><a href="/user/contact">Contact Us</a></li>
+                    <li><a href="/user/blog">Blog</a></li>
+                    <li><a href="/user/offers">Special Offers</a></li>
+                    <li><a href="/user/faq">FAQ</a></li>
+                    <li><a href="/user/register">Sign Up</a></li>
+                    <li><a href="/user/logout">Logout</a></li>
+                </ul>
+            </nav>
+            <div class="search-bar">
+                <form action="/search" method="get">
+                    <input type="text" name="query" placeholder="Search here...">
+                    <button type="submit">Search</button>
+                </form>
             </div>
-
-            <div>
-                <label for="maxPrice">Max Price:</label>
-                <input type="number" id="maxPrice" name="maxPrice" placeholder="Max price">
-            </div>
-
-            <button type="submit">Filter</button>
-        </form>
-
-      
-        <div class="product-list">
-            <% if (products.length > 0) { %>
-                <% products.forEach(product => { %>
-                    <div class="product-item">
-                        <h2><%= product.name %></h2>
-                        <p><%= product.description %></p>
-                        <p><strong>Price: $<%= product.price %></strong></p>
-
-                        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
-                      
-
-                        <a href="/user/product/<%= product._id %>">View Details</a>
-
-                        <form action="/user/add-to-cart/<%= product._id %>" method="POST">
-                            <label for="quantity-<%= product._id %>">Quantity:</label>
-                            <input type="number" id="quantity-<%= product._id %>" name="quantity" value="1" min="1" style="width: 60px;">
-                            <button type="submit">Add to Cart</button>
-                        </form>
-
-                        <form action="/user/add-to-wishlist/<%= product._id %>" method="POST">
-                            <button type="submit">Add to Wishlist</button>
-                        </form>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <p>No products available at the moment.</p>
-            <% } %>
         </div>
-    </div>
+    </header>
 
+    <main class="main-content">
+        <div class="container">
+
+            <section class="main-banner">
+                <img src="/purple.image/purple.jpg" alt="Main Banner" class="banner-image">
+            </section>
+
+            <section class="shopping-interesting">
+                <div class="shopping-message">
+                    <h2>Exclusive Offers Just for You!</h2>
+                    <p>Shop now and enjoy discounts on your favorite products. From electronics to fashion, we have everything you need!</p>
+                    <a href="/user/offers" class="btn">Explore Offers</a>
+                </div>
+            </section>
+
+            <section class="filters">
+                <form action="/user/products" method="get" class="filter-form">
+                    <div class="filter-item">
+                        <label for="category">Filter by category:</label>
+                        <select id="category" name="category">
+                            <option value="">All Categories</option>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>" <%= selectedCategory === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="minPrice">Min Price:</label>
+                        <input type="number" id="minPrice" name="minPrice" placeholder="Min price" min="1">
+                    </div>
+                    <div class="filter-item">
+                        <label for="maxPrice">Max Price:</label>
+                        <input type="number" id="maxPrice" name="maxPrice" placeholder="Max price">
+                    </div>
+                    <div class="filter-item">
+                        <label for="sort">Sort by:</label>
+                        <select id="sort" name="sort">
+                            <option value="price" <% if (sort === 'price') { %> selected <% } %>>Price (Low to High)</option>
+                            <option value="-price" <% if (sort === '-price') { %> selected <% } %>>Price (High to Low)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Apply Filters</button>
+                </form>
+            </section>
+
+            <h1 class="products-main">Product List</h1>
+            <section class="product-list">
+                <% if (products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                        <div class="product-item">
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                            <h2><%= product.name %></h2>
+                            <p><strong>Price: $<%= product.price %></strong></p>
+                            <a href="/user/product/<%= product._id %>" class="btn">View Details</a>
+
+                            <div class="product-actions">
+                                <form action="/user/add-to-cart/<%= product._id %>" method="POST" class="form-inline">
+                                    <button type="submit" class="btn">Add to Cart</button>
+                                </form>
+                                <form action="/user/add-to-wishlist/<%= product._id %>" method="POST">
+                                    <button type="submit" class="btn">Add to Wishlist</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>No products available at the moment.</p>
+                <% } %>
+            </section>
+
+            <section class="featured-devices">
+                <div class="featured-content">
+                    <div class="description">
+                        <h2>Explore the Latest Devices</h2>
+                        <p>Discover a range of tablets, phones, and laptops tailored to meet all your tech needs. Whether you're working, gaming, or staying connected, we have the perfect device for you.</p>
+                        <a href="/user/products?category=electronics" class="btn">Discover More</a>
+                    </div>
+                    <div class="image-container">
+                        <img src="https://tse3.mm.bing.net/th?id=OIP.HzCeFhjsHE5H-zhTyTaLhQHaDt&pid=Api&P=0&h=180" class="featured-image" alt="Featured Devices">
+                    </div>
+                </div>
+            </section>
+            
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Purple. All Rights Reserved.</p>
+        </div>
+    </footer>
 </body>
 
 </html>
- 
 
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-  

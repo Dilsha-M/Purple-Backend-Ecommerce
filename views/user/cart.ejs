@@ -1,21 +1,24 @@
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container cart-container">
         <h1>Your Shopping Cart</h1>
 
         <% if (cart && Array.isArray(cart.items) && cart.items.length > 0) { %>
+           
             <table class="cart-table">
                 <thead>
                     <tr>
                         <th>Product</th>
                         <th>Quantity</th>
-                       <th>image</th>
+                        <th>Image</th>
                         <th>Price</th>
                         <th>Subtotal</th>
                         <th>Remove</th>
@@ -24,50 +27,48 @@
                 <tbody>
                     <% cart.items.forEach(item => { %>
                         <tr>
-                            <td><%= item.product.name %></td>
-                            <td>
-                                <form action="/user/cart/update-cart/<%= item.product._id %>" method="POST">
-                                    <input 
-                                        type="number" 
-                                        name="quantity" 
-                                        value="<%= item.quantity %>" 
-                                        min="1" 
-                                        class="quantity-input"
-                                    >
-                                    <button type="submit">Update</button>
-                                </form>
-                                
-                            </td>
-                            <td><img src="<%= item.product.image %>"width="150" height="150" alt=""></td>
-                            
-                            <td>$<%= item.product.price %></td>
-                            <td>$<%= item.product.price * item.quantity %></td>
-                            <td>
-                                <form action="/user/remove-from-cart/<%= item.product._id %>" method="post">
-
-                                    <button type="submit">Remove</button>
-                                </form>
-                                
-                            </td>
+                            <% if (item.product) { %>
+                                <td><%= item.product.name %></td>
+                                <td>
+                                    <form action="/user/cart/update-cart/<%= item.product._id %>" method="POST">
+                                        <input 
+                                            type="number" 
+                                            name="quantity" 
+                                            value="<%= item.quantity %>" 
+                                            min="1" 
+                                            class="quantity-input"
+                                        >
+                                        <button type="submit" class="update-btn">Update</button>
+                                    </form>
+                                </td>
+                                <td> <a href="/user/product/<%= item.product._id %>"><img src="<%= item.product.image %>" width="120" height="120" alt="<%= item.product.name %>" ></a></td>
+                                <td>$<%= item.product.price %></td>
+                                <td>$<%= item.product.price * item.quantity %></td>
+                                <td>
+                                    <form action="/user/remove-from-cart/<%= item.product._id %>" method="post">
+                                        <button type="submit" class="remove-btn">Remove</button>
+                                    </form>
+                                </td>
+                            <% } else { %>
+                                <td colspan="6">This product is no longer available.</td>
+                            <% } %>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
+
+            <div class="cart-summary">
+                <p><strong>Total Items:</strong> <%= cart.items.length %></p>
+                <p><strong>Total Price:</strong> $<%= cart.totalPrice.toFixed(2) %></p>
+            </div>
         <% } else { %>
             <p class="empty-cart-message">Your cart is empty.</p>
         <% } %>
     </div>
 
     <div class="cart-footer">
-        <a href="/user/products">Go back</a>
+        <a href="/user/products">Back to Products</a>
+        <a href="/user/checkout" class="checkout-btn">Proceed to Checkout</a>
     </div>
 </body>
-</html> 
-
-
-
-
-
-
-
- 
+</html>

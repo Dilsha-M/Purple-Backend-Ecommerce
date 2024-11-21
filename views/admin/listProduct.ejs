@@ -1,4 +1,4 @@
-
+<!-- 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,145 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            display: flex;
-            min-height: 100vh;
-            background-color: #f4f6f7;
-            color: #333;
-        }
-
-       
-        .sidebar {
-            width: 250px;
-            background-color: #0f5132;
-            padding: 20px;
-            color: #fff;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow-y: auto; 
-        }
-
-        .sidebar h1 {
-            color: #ffffff;
-            font-size: 1.8em;
-            margin-bottom: 20px;
-        }
-
-        .sidebar .actions a {
-            display: block;
-            padding: 10px;
-            margin: 10px 0;
-            color: #fff;
-            text-decoration: none;
-            background-color: #1c7430;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .sidebar .actions a:hover {
-            background-color: #154c24;
-        }
-
-     
-        .product-container {
-            margin-left: 270px;
-            padding: 40px;
-            flex-grow: 1;
-            height: 100vh;
-             /* overflow-y: auto;    */
-            overflow:scroll; 
-    }
-
-        .product-container h2 {
-            font-size: 1.8em;
-            color: #0f5132;
-            margin-bottom: 20px;
-        }
-
-     
-        .product-list {
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px; 
-            justify-content: space-between;
-            padding: 0;
-            margin: 0;
-        }
-
-        .product-item {
-            background-color: #ffffff;
-            border: 2px solid #0f5132;
-            border-radius: 10px;
-            padding: 20px;
-            width: 280px; 
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .product-item img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .product-item strong {
-            color: #0f5132;
-            font-size: 1em;
-        }
-
-        .product-item p {
-            color: #555;
-            font-size: 0.9em;
-            margin-top: 10px;
-        }
-
-  
-        .product-actions {
-            margin-top: 10px;
-        }
-
-        .product-actions a,
-        .product-actions button,
-        .product-actions input[type="submit"] {
-            background-color: #1c7430;
-            color: #fff;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9em;
-            text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.3s ease;
-        }
-
-        .product-actions a:hover,
-        .product-actions button:hover,
-        .product-actions input[type="submit"]:hover {
-            background-color: #154c24;
-        }
-
-        .product-actions form {
-            display: inline;
-        }
-    </style>
 </head>
 
 <body>
@@ -166,6 +27,7 @@
     <div class="product-container">
         <h2 class="page-heading">Product List</h2>
         <ul class="product-list">
+
             <% Products.forEach(product => { %>
                 
                 <li class="product-item">
@@ -179,7 +41,7 @@
                     <strong>Description:</strong> <%= product.description %><br>
 
                     <% if (product.image) { %>
-                        <img src="<%= product.image %>" alt="<%= product.name %>">
+                        <img class="product-image" src="<%= product.image %>" alt="<%= product.name %>">
                     <% } %>
 
 
@@ -209,5 +71,75 @@
     </div>
 </body>
 
-</html>
+</html> -->
 
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h1>Admin Dashboard</h1>
+        <div class="actions">
+            <a href="/admin/create">Create New Product</a>
+            <a href="/admin/products">View All Products</a>
+            <a href="/admin/create-category">Create New Category</a>
+            <a href="/admin/categories">View All Categories</a>
+            <a href="/admin/create-subcategory">Create New Subcategory</a>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="product-container">
+        <h2 class="page-heading">Product List</h2>
+        <ul class="product-list">
+            <% Products.forEach(product => { %>
+                <li class="product-item">
+                    <div class="image-container">
+                        <% if (product.image) { %>
+                            <img class="product-image" src="<%= product.image %>" alt="<%= product.name %>">
+                        <% } else { %>
+                            <img class="product-image" src="/images/placeholder.png" alt="Placeholder">
+                        <% } %>
+                    </div>
+                    <div>
+                        <strong>Name:</strong> <%= product.name %><br>
+                        <strong>Category:</strong> <%= product.category ? product.category.name : 'Uncategorized' %><br>
+                        <strong>Price:</strong> $<%= product.price.toFixed(2) %><br>
+                        <strong>Description:</strong> <%= product.description %><br>
+                        <strong>Stock:</strong> <%= product.stock %><br>
+
+                        <div class="product-actions">
+                            <a href="/admin/products/<%= product._id %>">Update</a>
+
+                            <form action="/admin/products/<%= product._id %>/block" method="POST" style="display:inline;">
+                                <% if (product.isBlocked) { %>
+                                    <strong style="color: red;">Out of Stock</strong>
+                                <% } %>
+                                <button type="submit">
+                                    <%= product.isBlocked ? 'Unblock' : 'Block' %>
+                                </button>
+                            </form>
+
+                            <form action="/admin/product/delete/<%= product._id %>" method="post" style="display:inline;">
+                                <input type="submit" value="Delete">
+                            </form>
+                        </div>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</body>
+
+</html>

@@ -60,7 +60,7 @@ const dashboard = async (req, res) => {
 
 
 const createProduct = async (req, res) => {
-    const { name, description, price, category,  stock } = req.body;
+    const { name, description, price, category, stock } = req.body;
     try {
 
         const categories = await Category.find();
@@ -79,7 +79,7 @@ const createProduct = async (req, res) => {
 
         await product.save()
 
-        res.render('admin/createProduct',{categories});
+        res.render('admin/createProduct', { categories });
 
     } catch (error) {
         res.status(500).json({ message: "Error creating product", error })
@@ -99,10 +99,10 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ message: "Product not found" });
         }
 
-        
-        let imagePath = existProduct.image; 
+
+        let imagePath = existProduct.image;
         if (req.file) {
-            imagePath = '/productImages/' + req.file.filename; 
+            imagePath = '/productImages/' + req.file.filename;
         }
 
         const updatedProduct = await Product.findByIdAndUpdate(
@@ -115,7 +115,7 @@ const updateProduct = async (req, res) => {
                 stock,
                 image: imagePath
             },
-            { new: true } 
+            { new: true }
         );
 
         if (!updatedProduct) {
@@ -175,12 +175,9 @@ const blockedProducts = async (req, res) => {
     }
 }
 
-
 const logOut = (req, res) => {
     try {
         res.clearCookie('adminInfo')
-
-        // res.status(200).json({ message: 'Logged out successfully' });
 
         res.redirect('/admin/login');
     } catch (error) {
@@ -221,14 +218,14 @@ const updateCategory = async (req, res) => {
     const { name } = req.body;
 
     try {
-     
+
         const category = await Category.findByIdAndUpdate(categoryId, { name }, { new: true });
 
         if (!category) {
             return res.status(404).json({ message: "Category not found" });
         }
 
- 
+
         res.redirect('/admin/categories');
     } catch (error) {
         res.status(500).json({ message: 'Error updating category', error });
@@ -251,7 +248,7 @@ const deleteCategory = async (req, res) => {
 const listSubCategories = async (req, res) => {
     try {
         const subCategories = await SubCategory.find()
-            .populate('parentCategory', 'name'); 
+            .populate('parentCategory', 'name');
 
         res.render('admin/listSubCategories', { subCategories });
     } catch (error) {
@@ -264,32 +261,32 @@ const createSubCategory = async (req, res) => {
     const { name, categoryId } = req.body;
 
     try {
-       
+
         if (!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
             return res.status(400).json({ message: "Invalid or missing category ID" });
         }
 
-        
-        const category = await Category.findById(categoryId); 
+
+        const category = await Category.findById(categoryId);
         if (!category) {
             return res.status(404).json({ message: "Category not found" });
         }
 
-      
+
         const subCategory = new SubCategory({
             name,
-            parentCategory: categoryId,  
+            parentCategory: categoryId,
         });
 
-       
+
         await subCategory.save();
 
-       
+
         category.subCategories.push(subCategory._id);
         await category.save();
 
-   
-        res.redirect('/admin/subcategories'); 
+
+        res.redirect('/admin/subcategories');
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Error creating subcategory", error });
@@ -302,7 +299,7 @@ const updateSubCategory = async (req, res) => {
     const { name, categoryId } = req.body;
 
     try {
-      
+
         const subCategory = await SubCategory.findById(subcategoryId).populate('parentCategory');
 
         if (!subCategory) {
@@ -330,15 +327,15 @@ const updateSubCategory = async (req, res) => {
 
 
 const deleteSubCategory = async (req, res) => {
-    const { subcategoryId } = req.params; 
+    const { subcategoryId } = req.params;
 
     try {
-        const subCategory = await SubCategory.findByIdAndDelete(subcategoryId); 
+        const subCategory = await SubCategory.findByIdAndDelete(subcategoryId);
         if (!subCategory) {
             return res.status(404).json({ message: "SubCategory not found" });
         }
 
-        res.redirect('/admin/subcategories'); 
+        res.redirect('/admin/subcategories');
     } catch (error) {
         res.status(500).json({ message: "Error deleting subcategory", error });
     }
@@ -357,7 +354,7 @@ module.exports = {
     listProducts,
     blockedProducts,
     logOut,
-    
+
     createCategory,
     updateCategory,
     deleteCategory,

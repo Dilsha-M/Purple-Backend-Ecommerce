@@ -1,28 +1,149 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTP Verification</title>
-    <link rel="stylesheet" href="/style.css">
 </head>
+<style>
+   
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
 
+body {
+    background-color: #fff;  
+    background: linear-gradient(to right, #000, #fff);  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100vh;
+    color: #000; 
+}
+
+
+.container {
+    background-color: #fff; 
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+    position: relative;
+    width: 768px;
+    max-width: 100%;
+    min-height: 480px;
+    padding: 20px;
+}
+
+
+.header-box {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-box h1 {
+    color: #000; 
+    font-size: 48px;
+    letter-spacing: 2px;
+}
+
+
+.otp-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.otp-container h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #000;
+    text-align: center;
+}
+
+.otp-container label {
+    font-size: 14px;
+    margin: 10px 0 5px;
+    color: #000;
+}
+
+.otp-container input {
+    background-color: #eee; 
+    border: 1px solid #ccc; 
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    width: 80%;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.otp-container input:focus {
+    border-color: #000; 
+}
+
+.otp-container p {
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.3px;
+    margin: 20px 0;
+    color: #000;
+}
+
+.otp-container button {
+    background-color: #000; 
+    color: #fff; 
+    font-size: 14px;
+    padding: 10px 45px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.otp-container button:hover {
+    background-color: #333; 
+}
+
+.otp-container a {
+    color: #000; 
+    font-size: 14px;
+    text-decoration: none;
+    margin: 15px 0 10px;
+}
+
+.otp-container a:hover {
+    text-decoration: underline; 
+}
+
+.otp-container p {
+    color: #000; 
+}
+
+</style>
 <body>
-    <div class="header-box">  
-        <h1>Purple</h1>
-    </div>
-    <div class="otp-container">
-        <h3>OTP Verification</h3>
-        <form action="/user/verifyotp" method="POST">
-            <label for="otp">Enter the OTP sent to your email:</label>
-            <input type="text" id="otp" name="user_otp" required>
-            <button type="submit">Verify OTP</button>
-        </form>
-        <p>Did not receive the OTP? <a href="/user/forgetpassword">Resend OTP</a>.</p>
-        <p><%= error || '' %></p>
+    <div class="container">
+        <div class="header-box">  
+            <h1>Purple</h1>
+        </div>
+
+        <div class="otp-container">
+            <h3>OTP Verification</h3>
+            <form action="/user/verifyotp" method="POST">
+                <label for="otp">Enter the OTP sent to your email or phone:</label>
+                <input type="text" id="otp" name="user_otp" required>
+                <button type="submit">Verify OTP</button>
+            </form>
+            <p>Did not receive the OTP? <a href="/user/forgetpassword">Resend OTP</a>.</p>
+            <p><%= error || '' %></p>
+        </div>
     </div>
 </body>
 </html>
-

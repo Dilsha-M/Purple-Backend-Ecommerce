@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router()
 
 
-const { registerUser, loginUser, forgetPassword, verifyOTP, resetPassword,listProducts, getProductDetails,addToCart,updateCart,getCart,removeFromCart,clearCart,addToWishlist,removeFromWishlist,getWishlist} = require('../controller/userController.js')
+const { registerUser, loginUser, forgetPassword, verifyOTP, resetPassword,listProducts, getProductDetails,addToCart,updateCart,getCart,removeFromCart,addToWishlist,removeFromWishlist,getWishlist,aboutPage,logoutUser} = require('../controller/userController.js')
 
 const verifyJWT = require('../middleware/jwtMiddleware.js');
 const { Product } = require('../models/adminModels.js');
@@ -94,11 +94,6 @@ router.route('/add-to-cart/:id')
 
 
 
-router.route('/clear-cart')
-    .post(verifyJWT, (req, res) => {
-        clearCart(req, res);
-    });
-
 
 
 
@@ -114,6 +109,9 @@ router.route('/remove-from-wishlist/:id')
     .post(verifyJWT, removeFromWishlist); 
 
 
+    router.get('/about', aboutPage);
+
+    router.get('/logout', logoutUser);
 
 module.exports = router;
 

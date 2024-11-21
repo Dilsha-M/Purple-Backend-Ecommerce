@@ -1,9 +1,10 @@
 
-const { User,Cart,Wishlist } = require('../models/usersModels.js');
-const { Product } = require('../models/adminModels.js');
+const { User, Cart, Wishlist } = require('../models/usersModels.js');
+const { Product, Category } = require('../models/adminModels.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generateOTP = require("../middleware/otpmiddleware.js");
+const { sendSms } = require("../middleware/smsMiddleware");
 
 
 const registerUser = async (req, res) => {
@@ -28,8 +29,8 @@ const registerUser = async (req, res) => {
             });
         }
 
-        let cleanPhone = phone.replace(/\D/g, '').trim();  
-        const phoneRegex = /^[6-9]\d{9}$/; 
+        let cleanPhone = phone.replace(/\D/g, '').trim();
+        const phoneRegex = /^[6-9]\d{9}$/;
         if (!phoneRegex.test(cleanPhone)) {
             return res.status(400).render('user/register&login', {
                 error: 'Please enter a valid 10-digit phone number starting with digits 6-9.',
@@ -83,7 +84,7 @@ const loginUser = async (req, res) => {
 
         const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 
-        res.cookie('auth_token', token, { httpOnly: true});
+        res.cookie('auth_token', token, { httpOnly: true });
 
 
         res.redirect('/user/products');
@@ -94,21 +95,89 @@ const loginUser = async (req, res) => {
 
 
 
+// const forgetPassword = async (req, res) => {
+//     const { email } = req.body;
+
+//     try {
+//         const user = await User.findOne({ email });
+//         if (!user) {
+//             return res.status(404).send("User not found");
+//         }
+
+//         const otp = await generateOTP(email);
+//         res.cookie('otp', otp).cookie('email', email).render('user/verifyotp', { error: '' });
+//     } catch (error) {
+//         res.status(500).send("Error sending OTP: " + error.message);
+//     }
+// };
+
+
+
+// const verifyOTP = async (req, res) => {
+//     const { user_otp } = req.body;
+//     const otp = req.cookies.otp;
+
+//     if (otp === user_otp) {
+//         return res.render('user/resetpassword', { error: '' });
+//     } else {
+//         return res.status(400).render('user/verifyotp', { err: 'OTP is incorrect. Please try again.' });
+//     }
+// };
+
+
+
+
 const forgetPassword = async (req, res) => {
-    const { email } = req.body;
+    const { email, phone } = req.body;
+
+    if (!email && !phone) {
+        return res.status(400).json({ error: 'Either email or phone number is required.' });
+    }
 
     try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
+        // Log the inputs
+        console.log('Request body:', req.body);  // Log the email and phone being sent
 
-        const otp = await generateOTP(email);
-        res.cookie('otp', otp).cookie('email', email).render('user/verifyotp', { error: '' });
+        if (email) {
+            console.log(`Searching for user with email: ${email}`);
+            const user = await User.findOne({ email });
+            if (!user) {
+                console.log(`User with email ${email} not found.`);
+                return res.status(404).json({ error: 'User with this email not found.' });
+            }
+
+            const otp = await generateOTP(email);  // Generate OTP for email
+            console.log(`Generated OTP for email ${email}: ${otp}`);
+            res.cookie('otp', otp).cookie('email', email).render('user/verifyotp', { error: '' });
+        } else if (phone) {
+            let cleanPhone = phone.replace(/\D/g, '').trim();  // Clean phone number input
+            console.log(`Cleaned phone number: ${cleanPhone}`);
+
+            const phoneRegex = /^[6-9]\d{9}$/;
+            if (!phoneRegex.test(cleanPhone)) {
+                console.log(`Invalid phone number format: ${cleanPhone}`);
+                return res.status(400).json({ error: 'Invalid phone number format. Please enter a valid 10-digit phone number starting with 6-9.' });
+            }
+
+            console.log(`Searching for user with phone: ${cleanPhone}`);
+            const user = await User.findOne({ phone: cleanPhone });
+            if (!user) {
+                console.log(`User with phone ${cleanPhone} not found.`);
+                return res.status(404).json({ error: 'User with this phone number not found.' });
+            }
+
+            const otp = await sendSms(cleanPhone);  // Generate OTP via SMS
+            console.log(`Generated OTP for phone ${cleanPhone}: ${otp}`);
+            res.cookie('otp', otp).cookie('phone', cleanPhone).render('user/verifyotp', { error: '' });
+        }
     } catch (error) {
-        res.status(500).send("Error sending OTP: " + error.message);
+        console.error('Error in forgetPassword function:', error);  // Log the error details
+        res.status(500).json({ error: 'Error processing your request. Please try again later.' });
     }
 };
+
+
+
 
 const verifyOTP = async (req, res) => {
     const { user_otp } = req.body;
@@ -117,9 +186,15 @@ const verifyOTP = async (req, res) => {
     if (otp === user_otp) {
         return res.render('user/resetpassword', { error: '' });
     } else {
-        return res.status(400).render('user/verifyotp', { err: 'OTP is incorrect. Please try again.' });
+        return res.status(400).render('user/verifyotp', { error: 'OTP is incorrect. Please try again.' });
     }
 };
+
+
+
+
+
+
 
 const resetPassword = async (req, res) => {
     const { newPassword, confirmPassword } = req.body;
@@ -157,28 +232,61 @@ const resetPassword = async (req, res) => {
 
 const listProducts = async (req, res) => {
     try {
-        const { name, minPrice, maxPrice } = req.query;
-        let filter = {};
+        const { minPrice, maxPrice, sort, category } = req.query;
+        const userId = req.user?.id; 
+        
+        let filter = { isBlocked: false };
 
-        if (name) {
-            filter.name = new RegExp(name, 'i');
+        if (minPrice && maxPrice) {
+            filter.price = { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) };
+        } else {
+            if (minPrice) filter.price = { $gte: parseFloat(minPrice) };
+            if (maxPrice) filter.price = { $lte: parseFloat(maxPrice) };
         }
 
-        if (minPrice) {
-            filter.price = { $gte: parseFloat(minPrice) };
+        if (category && category !== '') {
+            filter.category = category
         }
 
-        if (maxPrice) {
-            filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
+        let sortOptions = {};
+        if (sort) {
+            if (sort === 'price') {
+                sortOptions.price = 1;
+            } else if (sort === '-price') {
+                sortOptions.price = -1;
+            }
         }
 
-        const products = await Product.find(filter);
-        res.render('user/listProduct', { products });
+        const products = await Product.find(filter).populate('category').sort(sortOptions);
+        const categories = await Category.find();
+
+   
+        let cartCount = 0;
+        let wishlistCount = 0;
+        if (userId) {
+            const cart = await Cart.findOne({ user: userId });
+            cartCount = cart ? cart.items.length : 0;
+
+            const wishlist = await Wishlist.findOne({ user: userId });
+            wishlistCount = wishlist ? wishlist.items.length : 0;
+        }
+
+        res.render('user/listProduct', {
+            products,
+            minPrice: minPrice || '',
+            maxPrice: maxPrice || '',
+            sort: sort || '',
+            categories,
+            selectedCategory: category || '',
+            cartCount, 
+            wishlistCount,
+        });
     } catch (error) {
-        console.error(error);
         res.status(500).send('Error fetching products');
     }
 };
+
+
 
 const getProductDetails = async (req, res) => {
     const { id } = req.params;
@@ -188,29 +296,27 @@ const getProductDetails = async (req, res) => {
         if (!product) {
             return res.status(404).send('Product not found');
         }
+
+
         res.render('user/viewProduct', { product });
     } catch (error) {
-        console.error(error);
+
         res.status(500).send('Error fetching product details');
     }
 };
 
 const addToCart = async (req, res) => {
-    const { id } = req.params; 
-    const userId = req.user?.id; 
+    const { id } = req.params;
+    const userId = req.user?.id;
 
     if (!userId) {
         return res.status(401).send("Unauthorized");
     }
 
     try {
-        
-        console.log("Adding to cart - Product ID:", id, "User ID:", userId);
 
-        
         const product = await Product.findById(id);
         if (!product) {
-            console.log("Product not found");
             return res.status(404).send("Product not found");
         }
 
@@ -226,10 +332,10 @@ const addToCart = async (req, res) => {
         );
 
         if (existingProductIndex !== -1) {
-           
+
             cart.items[existingProductIndex].quantity += 1;
         } else {
-           
+
             cart.items.push({
                 product: id,
                 quantity: 1,
@@ -238,51 +344,47 @@ const addToCart = async (req, res) => {
 
 
         await cart.save();
-        console.log("Cart updated successfully");
 
-        res.redirect('/user/cart'); 
+        res.redirect('/user/cart');
     } catch (error) {
-        console.error("Error adding product to cart:", error);
         res.status(500).send("Error adding product to cart");
     }
 };
 
+
+
+
 const getCart = async (req, res) => {
-    const userId = req.user?.id; 
- 
+    const userId = req.user?.id;
 
     try {
-       
+ 
         const cart = await Cart.findOne({ user: userId }).populate('items.product');
 
         if (!cart || cart.items.length === 0) {
-          
             return res.render('user/cart', { cart: [], total: 0 });
         }
 
-    
-        const total = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+        const validItems = cart.items.filter(item => item.product);
 
-       
-        res.render('user/cart', { cart });
+        const totalPrice = validItems.reduce((sum, item) => {
+            return sum + item.product.price * item.quantity;
+        }, 0);
+
+        res.render('user/cart', { cart: { items: validItems, totalPrice } });
     } catch (error) {
-      
         res.status(500).send("Error fetching cart");
     }
 };
 
 
-
-
-
-
 const updateCart = async (req, res) => {
-    const { id } = req.params; 
+    const { id } = req.params;
     const { quantity } = req.body;
     const userId = req.user.id;
 
     try {
-       
+
         if (isNaN(quantity) || quantity <= 0) {
             return res.status(400).send("Invalid quantity.");
         }
@@ -306,7 +408,7 @@ const updateCart = async (req, res) => {
 
         res.redirect('/user/cart');
     } catch (error) {
-        console.error("Error updating cart:", error);
+
         res.status(500).json({ message: 'Error updating cart', error });
     }
 };
@@ -314,23 +416,22 @@ const updateCart = async (req, res) => {
 
 const removeFromCart = async (req, res) => {
     const { id } = req.params;
-    const userId = req.user.id; 
+    const userId = req.user.id;
     try {
-        console.log("Removing product from cart:", { productId: id, userId });
 
         let cart = await Cart.findOne({ user: userId });
         if (!cart) {
-            console.log("Cart not found");
+
             return res.status(404).send("Cart not found");
         }
 
         cart.items = cart.items.filter(item => item.product.toString() !== id);
         await cart.save();
 
-        console.log("Product removed from cart successfully");
-        res.redirect('/user/cart'); 
+
+        res.redirect('/user/cart');
     } catch (error) {
-        console.error("Error removing product from cart:", error);
+
         res.status(500).send("Error removing product from cart");
     }
 };
@@ -338,32 +439,18 @@ const removeFromCart = async (req, res) => {
 
 
 
-const clearCart = async (req, res) => {
+const addToWishlist = async (req, res) => {
+    const productId = req.params.id;
     const userId = req.user.id;
 
     try {
-   
-        await Cart.findOneAndDelete({ user: userId });
 
-        res.redirect('/user/cart'); 
-    } catch (error) {
-        console.error("Error clearing cart:", error);
-        res.status(500).send("Error clearing cart");
-    }
-};
-
-const addToWishlist = async (req, res) => {
-    const productId = req.params.id;
-    const userId = req.user.id; 
-
-    try {
-   
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).send('Product not found');
         }
 
-     
+
         let wishlist = await Wishlist.findOne({ user: userId });
 
 
@@ -371,17 +458,17 @@ const addToWishlist = async (req, res) => {
             wishlist = new Wishlist({ user: userId, items: [] });
         }
 
-   
+
         if (!wishlist.items.includes(productId)) {
             wishlist.items.push(productId);
         }
 
-      
+
         await wishlist.save();
 
-        res.redirect('/user/wishlist'); 
+        res.redirect('/user/wishlist');
     } catch (error) {
-        console.error("Error adding to wishlist:", error);
+
         res.status(500).send('Error adding to wishlist');
     }
 };
@@ -389,10 +476,10 @@ const addToWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
     const productId = req.params.id;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     try {
-   
+
         let wishlist = await Wishlist.findOne({ user: userId });
         if (!wishlist) {
             return res.status(404).send('Wishlist not found');
@@ -400,12 +487,12 @@ const removeFromWishlist = async (req, res) => {
 
         wishlist.items = wishlist.items.filter(item => item.toString() !== productId);
 
-      
+
         await wishlist.save();
 
-        res.redirect('/user/wishlist'); 
+        res.redirect('/user/wishlist');
     } catch (error) {
-        console.error("Error removing from wishlist:", error);
+
         res.status(500).send('Error removing from wishlist');
     }
 };
@@ -413,17 +500,32 @@ const removeFromWishlist = async (req, res) => {
 const getWishlist = async (req, res) => {
     const userId = req.user.id;
     try {
-      
+
         const wishlist = await Wishlist.findOne({ user: userId }).populate('items');
 
         if (!wishlist || wishlist.items.length === 0) {
-            return res.render('user/wishlist', { wishlist: [] }); 
+            return res.render('user/wishlist', { wishlist: [] });
         }
 
-        res.render('user/wishlist', { wishlist: wishlist.items }); // Render wishlist with product details
+        res.render('user/wishlist', { wishlist: wishlist.items });
     } catch (error) {
-        console.error("Error fetching wishlist:", error);
+
         res.status(500).send('Error fetching wishlist');
+    }
+};
+
+
+const aboutPage = (req, res) => {
+    res.render('user/about');
+};
+
+const logoutUser = (req, res) => {
+    try {
+        res.clearCookie('auth_token');
+
+        res.redirect('/user/login');
+    } catch (error) {
+        res.status(500).json({ message: 'Error logging out', error });
     }
 };
 
@@ -442,10 +544,11 @@ module.exports = {
     getCart,
     updateCart,
     removeFromCart,
-    clearCart,
     addToWishlist,
     removeFromWishlist,
     getWishlist,
+    aboutPage,
+    logoutUser
 };
 
 
