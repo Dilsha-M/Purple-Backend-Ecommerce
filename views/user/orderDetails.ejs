@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="order-details-page">
+        <h1 class="order-details-title">Order Details</h1>
+        
+        <div class="order-info">
+            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p><strong>Total Price:</strong> <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.totalAmount) %></p>
+            <p><strong>Status:</strong> <%= order.status %></p>
+            <p><strong>Placed At:</strong> <%= new Date(order.placedAt).toLocaleString() %></p>
+        </div>
+
+        <div class="order-items">
+            <p><strong>Items:</strong></p>
+            <ul>
+                <% order.items.forEach(item => { %>
+                    <li>
+                        <%= item.product.name %> - <%= item.quantity %> x 
+                        <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.product.price) %>
+                    </li>
+                <% }) %>
+            </ul>
+        </div>
+        
+
+        <a href="/user/orders" class="button back-to-orders">Back to Orders</a>
+    </div>
+</body>
+
+</html>

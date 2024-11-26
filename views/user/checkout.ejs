@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container checkout-container">
+        <h1>Checkout</h1>
+
+        <div class="cart-items">
+            <% if (cart.items && cart.items.length > 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Image</th>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% cart.items.forEach(item => { %>
+                            <tr>
+                                <td class="product-image-cell">
+                                    <img src="<%= item.product.image %>" alt="<%= item.product.name %>" class="product-image" />
+                                </td>
+                                <td class="product-name-cell">
+                                    <h4><%= item.product.name %></h4>
+                                </td>
+                                <td class="quantity-cell">
+                                    <%= item.quantity %>
+                                </td>
+                                <td class="price-cell">
+                                    $<%= item.product.price %>
+                                </td>
+                                <td class="subtotal-cell">
+                                    $<%= item.product.price * item.quantity %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+                <p>Total Price: $<%= cart.totalPrice.toFixed(2) %></p>
+            <% } else { %>
+                <p>Your cart is empty.</p>
+            <% } %>
+        </div>
+
+ 
+        <form action="/user/checkout/process" method="POST">
+            <div class="addresses">
+                <h3>Select Shipping Address</h3>
+                <% if (addresses && addresses.length > 0) { %>
+                    <select name="shippingAddressId" required>
+                        <% addresses.forEach(address => { %>
+                            <option value="<%= address._id %>">
+                                <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
+                            </option>
+                        <% }) %>
+                    </select>
+                <% } else { %>
+                    <p>No addresses available. Please add one below.</p>
+                <% } %>
+
+                <h3>Select Billing Address</h3>
+                <select name="billingAddressId" required>
+                    <% addresses.forEach(address => { %>
+                        <option value="<%= address._id %>">
+                            <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+           
+            <h3>Choose Payment Method</h3>
+            <label>
+                <input type="radio" name="paymentMethod" value="creditCard" required> Credit Card
+            </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="paypal" required> PayPal
+            </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="bankTransfer" required> Bank Transfer
+            </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="cashOnDelivery" required> Cash on Delivery
+            </label>
+
+            <button type="submit">Place Order</button>
+        </form>
+
+      
+        <h3>Add New Address</h3>
+<form action="/user/checkout/add-address" method="POST">
+    <div class="form-group">
+        <input type="text" name="addressLine1" id="addressLine1" placeholder="Address Line 1" required>
+    </div>
+
+    <div class="form-group">
+        <input type="text" name="addressLine2" id="addressLine2" placeholder="Address Line 2">
+    </div>
+
+    <div class="form-group">
+        <input type="text" name="city" id="city" placeholder="City" required>
+    </div>
+
+    <div class="form-group">
+        <input type="text" name="state" id="state" placeholder="State" required>
+    </div>
+
+    <div class="form-group">
+        <input type="text" name="postalCode" id="postalCode" placeholder="Postal Code" required>
+    </div>
+
+    <div class="form-group">
+        <input type="text" name="country" id="country" placeholder="Country" required>
+    </div>
+
+    <button type="submit">Add Address</button>
+</form>
+
+        
+    </div>
+</body>
+</html>

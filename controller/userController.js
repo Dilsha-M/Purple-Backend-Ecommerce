@@ -1,10 +1,12 @@
 
-const { User, Cart, Wishlist } = require('../models/usersModels.js');
+const { User, Cart, Wishlist, Order } = require('../models/usersModels.js');
 const { Product, Category } = require('../models/adminModels.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generateOTP = require("../middleware/otpmiddleware.js");
 const { sendSms } = require("../middleware/smsMiddleware");
+const paypal=require("../middleware/payPal.js")
+// const { checkout } = require('../routes/userRoutes.js');
 
 
 const registerUser = async (req, res) => {
@@ -94,39 +96,6 @@ const loginUser = async (req, res) => {
 };
 
 
-
-// const forgetPassword = async (req, res) => {
-//     const { email } = req.body;
-
-//     try {
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.status(404).send("User not found");
-//         }
-
-//         const otp = await generateOTP(email);
-//         res.cookie('otp', otp).cookie('email', email).render('user/verifyotp', { error: '' });
-//     } catch (error) {
-//         res.status(500).send("Error sending OTP: " + error.message);
-//     }
-// };
-
-
-
-// const verifyOTP = async (req, res) => {
-//     const { user_otp } = req.body;
-//     const otp = req.cookies.otp;
-
-//     if (otp === user_otp) {
-//         return res.render('user/resetpassword', { error: '' });
-//     } else {
-//         return res.status(400).render('user/verifyotp', { err: 'OTP is incorrect. Please try again.' });
-//     }
-// };
-
-
-
-
 const forgetPassword = async (req, res) => {
     const { email, phone } = req.body;
 
@@ -135,43 +104,31 @@ const forgetPassword = async (req, res) => {
     }
 
     try {
-        // Log the inputs
-        console.log('Request body:', req.body);  // Log the email and phone being sent
-
         if (email) {
-            console.log(`Searching for user with email: ${email}`);
             const user = await User.findOne({ email });
             if (!user) {
-                console.log(`User with email ${email} not found.`);
                 return res.status(404).json({ error: 'User with this email not found.' });
             }
 
-            const otp = await generateOTP(email);  // Generate OTP for email
-            console.log(`Generated OTP for email ${email}: ${otp}`);
+            const otp = await generateOTP(email);
             res.cookie('otp', otp).cookie('email', email).render('user/verifyotp', { error: '' });
         } else if (phone) {
-            let cleanPhone = phone.replace(/\D/g, '').trim();  // Clean phone number input
-            console.log(`Cleaned phone number: ${cleanPhone}`);
+            let cleanPhone = phone.replace(/\D/g, '').trim();
 
             const phoneRegex = /^[6-9]\d{9}$/;
             if (!phoneRegex.test(cleanPhone)) {
-                console.log(`Invalid phone number format: ${cleanPhone}`);
                 return res.status(400).json({ error: 'Invalid phone number format. Please enter a valid 10-digit phone number starting with 6-9.' });
             }
 
-            console.log(`Searching for user with phone: ${cleanPhone}`);
             const user = await User.findOne({ phone: cleanPhone });
             if (!user) {
-                console.log(`User with phone ${cleanPhone} not found.`);
                 return res.status(404).json({ error: 'User with this phone number not found.' });
             }
 
-            const otp = await sendSms(cleanPhone);  // Generate OTP via SMS
-            console.log(`Generated OTP for phone ${cleanPhone}: ${otp}`);
+            const otp = await sendSms(cleanPhone);
             res.cookie('otp', otp).cookie('phone', cleanPhone).render('user/verifyotp', { error: '' });
         }
     } catch (error) {
-        console.error('Error in forgetPassword function:', error);  // Log the error details
         res.status(500).json({ error: 'Error processing your request. Please try again later.' });
     }
 };
@@ -189,12 +146,6 @@ const verifyOTP = async (req, res) => {
         return res.status(400).render('user/verifyotp', { error: 'OTP is incorrect. Please try again.' });
     }
 };
-
-
-
-
-
-
 
 const resetPassword = async (req, res) => {
     const { newPassword, confirmPassword } = req.body;
@@ -230,13 +181,16 @@ const resetPassword = async (req, res) => {
 };
 
 
+
 const listProducts = async (req, res) => {
     try {
         const { minPrice, maxPrice, sort, category } = req.query;
-        const userId = req.user?.id; 
-        
+        const userId = req.user?.id;
+
+     
         let filter = { isBlocked: false };
 
+       
         if (minPrice && maxPrice) {
             filter.price = { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) };
         } else {
@@ -244,33 +198,46 @@ const listProducts = async (req, res) => {
             if (maxPrice) filter.price = { $lte: parseFloat(maxPrice) };
         }
 
+        
         if (category && category !== '') {
-            filter.category = category
+            filter.category = category;
         }
 
+        
         let sortOptions = {};
         if (sort) {
             if (sort === 'price') {
-                sortOptions.price = 1;
+                sortOptions.price = 1; 
             } else if (sort === '-price') {
-                sortOptions.price = -1;
+                sortOptions.price = -1; 
             }
         }
 
         const products = await Product.find(filter).populate('category').sort(sortOptions);
+
+        
         const categories = await Category.find();
 
-   
+        
         let cartCount = 0;
         let wishlistCount = 0;
+
         if (userId) {
-            const cart = await Cart.findOne({ user: userId });
-            cartCount = cart ? cart.items.length : 0;
+            
+            const cart = await Cart.findOne({ user: userId }).populate('items.product');
+            cartCount = cart && cart.items 
+                ? cart.items.filter(item => item.product).length 
+                : 0;
 
-            const wishlist = await Wishlist.findOne({ user: userId });
-            wishlistCount = wishlist ? wishlist.items.length : 0;
-        }
-
+          
+                const wishlist = await Wishlist.findOne({ user: userId }).populate('items');
+                if (wishlist) {
+                    wishlistCount = wishlist.items.length;
+                } else {
+                    wishlistCount = 0; 
+                }
+            }
+      
         res.render('user/listProduct', {
             products,
             minPrice: minPrice || '',
@@ -278,13 +245,63 @@ const listProducts = async (req, res) => {
             sort: sort || '',
             categories,
             selectedCategory: category || '',
-            cartCount, 
+            cartCount,
             wishlistCount,
         });
     } catch (error) {
         res.status(500).send('Error fetching products');
     }
 };
+
+const quickBuy = async (req, res) => {
+    const productId = req.params.id;
+    const userId = req.user?.id;
+
+    try {
+       
+        if (!userId) {
+            return res.redirect('/user/login');
+        }
+
+     
+        const user = await User.findById(userId);
+        const product = await Product.findById(productId);
+
+        // If the product is not found, handle the error
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+       
+        let cart = await Cart.findOne({ user: userId });
+
+        if (!cart) {
+            cart = new Cart({
+                user: userId,
+                items: [{ product: productId, quantity: 1 }],
+            });
+            await cart.save();
+        } else {
+            // Add the product to the cart if it's not already there
+            const productIndex = cart.items.findIndex(item => item.product.toString() === productId.toString());
+            if (productIndex === -1) {
+                cart.items.push({ product: productId, quantity: 1 });
+            } else {
+                
+                cart.items[productIndex].quantity += 1;
+            }
+            await cart.save();
+        }
+
+       
+        res.redirect('/user/checkout');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error processing quick buy');
+    }
+};
+
+
 
 
 
@@ -358,7 +375,7 @@ const getCart = async (req, res) => {
     const userId = req.user?.id;
 
     try {
- 
+
         const cart = await Cart.findOne({ user: userId }).populate('items.product');
 
         if (!cart || cart.items.length === 0) {
@@ -530,6 +547,342 @@ const logoutUser = (req, res) => {
 };
 
 
+const viewCheckout = async (req, res) => {
+    const userId = req.user?.id;  
+    try {
+        const user = await User.findById(userId);
+        const cart = await Cart.findOne({ user: userId }).populate('items.product');
+        
+        if (!cart || cart.items.length === 0) {
+            return res.render('user/checkout', { cart: [], totalPrice: 0, addresses: user.addresses });
+        }
+
+        const validItems = cart.items.filter(item => item.product);
+
+        const totalPrice = validItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+        res.render('user/checkout', { cart: { items: validItems, totalPrice }, addresses: user.addresses });
+    } catch (error) {
+        res.status(500).send('Error fetching cart for checkout');
+    }
+};
+
+
+
+const addAddress = async (req, res) => {
+    const userId = req.user.id;
+    const { addressLine1, addressLine2, city, state, postalCode, country } = req.body;
+
+    if (!addressLine1 || !city || !state || !postalCode || !country) {
+        return res.status(400).send('All fields must be provided.');
+    }
+
+    try {
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).send('User not found.');
+        }
+
+        const newAddress = {
+            addressLine1,
+            addressLine2,
+            city,
+            state,
+            postalCode,
+            country
+        };
+
+        user.addresses.push(newAddress);
+        await user.save();
+
+        res.redirect('/user/checkout');  
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error adding address');
+    }
+};
+
+
+const processCheckout = async (req, res) => {
+    // try {
+        const { shippingAddressId, billingAddressId, paymentMethod } = req.body;
+
+   
+        if (!shippingAddressId || !billingAddressId || !paymentMethod) {
+            return res.status(400).json({ error: "All fields must be provided." });
+        }
+
+    
+        const user = await User.findById(req.user.id);
+        const cart = await Cart.findOne({ user: req.user.id }).populate('items.product');
+
+       
+        if (!cart || cart.items.length === 0) {
+            return res.status(400).json({ error: "Your cart is empty." });
+        }
+
+       
+        const shippingAddress = user.addresses.id(shippingAddressId);
+        const billingAddress = user.addresses.id(billingAddressId);
+
+        if (!shippingAddress || !billingAddress) {
+            return res.status(400).json({ error: "Invalid addresses selected." });
+        }
+
+   
+        const validPaymentMethods = ['paypal', 'cashOnDelivery'];
+        if (!validPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({ error: "Invalid payment method." });
+        }
+        
+        if(paymentMethod==='cashOnDelivery')  {
+        let totalAmount = 0;
+        
+        cart.items.forEach(item => {
+            if (item.product && item.product.price) {
+                totalAmount += item.product.price * item.quantity;
+            } else {
+                return res.status(400).json({ error: "Each item must have a price." });
+            }
+        });
+
+       
+        if (totalAmount <= 0) {
+            return res.status(400).json({ error: "Total amount cannot be zero or negative." });
+        }
+
+        const order = await Order.create({
+            user: req.user.id,
+            items: cart.items.map(item => ({
+                product: item.product._id,  
+                quantity: item.quantity,
+                price: item.product.price,  
+            })),
+            shippingAddress: shippingAddress,
+            billingAddress: billingAddress,
+            totalAmount: totalAmount,
+            paymentMethod: paymentMethod,
+            status: 'Pending',  
+            placedAt: new Date(),
+        });
+
+  
+        await Cart.findByIdAndUpdate(cart._id, { items: [] });
+        res.redirect('/user/order-confirmation');
+    }
+
+    else if(paymentMethod==='paypal'){
+
+        let totalAmount = 0;
+        
+        cart.items.forEach(item => {
+            if (item.product && item.product.price) {
+                totalAmount += item.product.price * item.quantity;
+            } else {
+                return res.status(400).json({ error: "Each item must have a price." });
+            }
+        });
+
+       
+        if (totalAmount <= 0) {
+            return res.status(400).json({ error: "Total amount cannot be zero or negative." });
+        }
+
+
+        const paymentPayload = {
+            intent: 'sale',
+            payer: {
+                payment_method: 'paypal'
+            },
+            transactions: [{
+                amount: {
+                    total: totalAmount.toFixed(2),
+                    currency: 'USD'
+                },
+                description: 'Order payment'
+            }],
+            redirect_urls: {
+                return_url: `http://localhost:3000/user/order-confirmation`,  // PayPal success URL
+                cancel_url: `http://localhost:3000/user/orderfailed`   // PayPal cancel URL
+            }
+        };
+
+        // Step 3: Create the Payment on PayPal
+        paypal.payment.create(paymentPayload, async(error, payment) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({ error: "Payment creation failed." });
+            } else {
+                // Redirect user to PayPal for approval
+                for (let i = 0; i < payment.links.length; i++) {
+                    if (payment.links[i].rel === 'approval_url') {
+                        // Save the PayPal payment ID for future use (capturing)
+                        const order = await Order.create({
+                            user: req.user.id,
+                            items: cart.items.map(item => ({
+                                product: item.product._id,  
+                                quantity: item.quantity,
+                                price: item.product.price,  
+                            })),
+                            shippingAddress: shippingAddress,
+                            billingAddress: billingAddress,
+                            totalAmount: totalAmount,
+                            paymentMethod: paymentMethod,
+                            status: 'Pending',  
+                            placedAt: new Date(),
+                        });
+
+                        return res.redirect(payment.links[i].href); // Redirect to PayPal
+                    }
+                }
+            }
+        });
+
+
+    }
+
+
+     
+    // } catch (error) {
+    //     res.status(500).json({ error: "Something went wrong." });
+    // }
+};
+const capturePayment = async (req, res) => {
+    const paymentId = req.query.paymentId;  // PayPal payment ID
+    const payerId = req.query.PayerID;      // PayPal payer ID
+
+    try {
+        const paymentDetails = {
+            payer_id: payerId
+        };
+
+        // Step 1: Execute the payment to capture the funds
+        paypal.payment.execute(paymentId, paymentDetails, async (error, payment) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({ error: "Payment execution failed." });
+            } else {
+                // Step 2: Payment is successful
+                const order = await Order.findOneAndUpdate(
+                    { paymentId: payment.id },
+                    { status: 'Paid' }, // Update order status
+                    { new: true }
+                );
+
+                // Optionally, clear the cart after successful payment
+                await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
+
+                res.render('/user/orderConfirmation'); // Redirect to order confirmation page
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Payment processing failed." });
+    }
+};
+
+
+
+
+
+const orderConfirmation = async (req, res) => {
+    const userId = req.user.id;
+    try {
+    
+        const order = await Order.findOne({ user: userId }).sort({ createdAt: -1 })
+            .populate('items.product')
+            .populate('shippingAddress')
+            .populate('billingAddress');
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        res.render('user/orderConfirmation', { order });
+    } catch (error) {
+        res.status(500).send('Error fetching order confirmation details');
+    }
+};
+
+
+const viewOrders = async (req, res) => {
+    const userId = req.user.id;  
+
+    try {
+        
+        const orders = await Order.find({ user: userId })
+            .sort({ createdAt: -1 }) 
+            .populate('items.product')  
+            .populate('shippingAddress')  
+            .populate('billingAddress');  
+
+            orders.forEach(order => {
+                if (order.placedAt && !(order.placedAt instanceof Date)) {
+                    order.placedAt = new Date(order.placedAt);
+                }
+            });
+
+        res.render('user/viewOrders', { orders });
+    } catch (error) {
+        res.status(500).send('Error fetching orders');
+    }
+};
+
+
+const viewOrderDetails = async (req, res) => {
+    try {
+      const orderId = req.params.id;
+  
+     
+      const order = await Order.findById(orderId)
+        .populate('items.product') 
+        .exec();
+  
+      if (!order) {
+        return res.status(404).render('user/error', { error: "Order not found" });
+      }
+  
+      res.render('user/orderDetails', { order });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).render('user/error', { error: "An error occurred while fetching the order details." });
+    }
+  };
+
+
+
+
+
+const cancelOrder = async (req, res) => {
+    const { orderId } = req.params;  
+
+    try {
+      
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+       
+        if (order.status !== 'Pending') {
+            return res.status(400).send('You can only cancel orders that are "Pending"');
+        }
+
+      
+        order.status = 'Cancelled';
+        await order.save();
+
+     
+        res.redirect('/user/orders');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error canceling order');
+    }
+};
+
 
 
 module.exports = {
@@ -539,6 +892,7 @@ module.exports = {
     verifyOTP,
     resetPassword,
     listProducts,
+    quickBuy,
     getProductDetails,
     addToCart,
     getCart,
@@ -548,8 +902,17 @@ module.exports = {
     removeFromWishlist,
     getWishlist,
     aboutPage,
-    logoutUser
+    logoutUser,
+    viewCheckout,
+    capturePayment,
+    processCheckout,
+   addAddress,
+   orderConfirmation,
+   viewOrders,
+   viewOrderDetails,
+   cancelOrder
 };
+
 
 
 

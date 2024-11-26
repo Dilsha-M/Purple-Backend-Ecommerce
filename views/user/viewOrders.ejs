@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Orders</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="orders-container">
+        <h1 class="orders-title">Your Orders</h1>
+
+        <% if (orders && orders.length > 0) { %>
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                        <th>Placed At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order._id %></td>
+                            <td>
+                                <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.totalAmount) %>
+                            </td>
+                            <td><%= order.status %></td>
+                            <td>
+                                <% 
+                                const placedAt = new Date(order.placedAt);
+                                
+                                if (placedAt instanceof Date && !isNaN(placedAt)) { 
+                                %>
+                                    <!-- Format the date using toLocaleString() for a more readable format -->
+                                    <%= placedAt.toLocaleString() %> <!-- Example: "11/25/2024, 2:30:00 PM" -->
+                                <% 
+                                } else { 
+                                %>
+                                    <span class="invalid-date">Invalid Date</span>
+                                <% 
+                                } 
+                                %>
+                            </td>
+
+                            <td>
+                                <div class="order-actions-container">
+                                    <a href="/user/orders/<%= order._id %>" class="button order-details-button">Order Details</a>
+
+                                    <% if (order.status === 'Pending') { %>
+                                        <form method="POST" action="/user/orders/cancel-order/<%= order._id %>">
+                                            <button type="submit" class="button cancel-order-button">Cancel Order</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p class="no-orders">You have no orders yet.</p>
+        <% } %>
+
+        <div class="order-actions">
+            <a href="/user/products" class="button back-to-home">Back to Home</a>
+        </div>
+    </div>
+</body>
+
+</html>

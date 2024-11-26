@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <h1>Manage Orders</h1>
+
+        <form method="GET" action="/admin/orders">
+            <label for="status">Filter by Status:</label>
+            <select name="status" id="status">
+                <option value="">All</option>
+                <option value="Pending" <%=filterStatus==='Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Approved" <%=filterStatus==='Approved' ? 'selected' : '' %>>Approved</option>
+                <option value="Delivered" <%=filterStatus==='Delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="Cancelled" <%=filterStatus==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+            <button type="submit">Filter</button>
+        </form>
+
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User Details</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orders.forEach(order => { %>
+                    <tr>
+                        <td><%= order._id %></td>
+                        <td><%= order.user.name %> (<%= order.user.email %>)</td>
+                        <td><%= order.status %></td>
+                        <td>
+                            <a href="/admin/orders/<%= order._id %>">View Details</a> |
+                            <form method="POST" action="/admin/orders/change-status/<%= order._id %>">
+                                <select name="status">
+                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Approved" <%= order.status === 'Approved' ? 'selected' : '' %>>Approved</option>
+                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                </select>
+                                <button type="submit">Update Status</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+    </div>
+</body>
+
+</html>

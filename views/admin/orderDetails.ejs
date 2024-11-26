@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="order-details-container">
+        <h1>Order Details</h1>
+
+        <div class="order-info">
+            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p><strong>Customer:</strong> <%= order.user.name %> (<%= order.user.email %>)</p>
+            <p><strong>Status:</strong> <%= order.status %></p>
+        </div>
+
+        <h3>Items:</h3>
+        <ul class="order-items">
+            <% order.items.forEach(item => { %>
+                <li class="order-item">
+                    <%= item.product.name %> - <%= item.quantity %> x $<%= item.price.toFixed(2) %>
+                </li>
+            <% }) %>
+        </ul>
+
+        <div class="total-price">
+            <!-- <h3>Total Price: $<%= order.totalPrice %></h3> -->
+            <h3>Total Price: $<%= order.totalPrice.toFixed(2) %></h3>
+        </div>
+
+        <a href="/admin/orders" class="back-link">Back to Orders</a>
+    </div>
+
+</body>
+</html>

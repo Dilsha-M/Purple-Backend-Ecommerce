@@ -20,8 +20,9 @@
                 <ul>
                     <li><a href="/user/products">Home</a></li>
                     <li><a href="/user/cart">Your Cart <span class="badge"><%= cartCount %></span></a></li> 
-                    <li><a href="/user/wishlist">Your Wishlist <span class="badge"><%= wishlistCount %></span></a></li> 
+                    <li><a href="/user/wishlist">Your Wishlist <span class="badge"><%= wishlistCount %></span></a></li>
                     <li><a href="/user/account">My Account</a></li>
+                    <li><a href="/user/orders">My Orders</a></li> 
                     <li><a href="/user/about">About</a></li>
                     <li><a href="/user/contact">Contact Us</a></li>
                     <li><a href="/user/blog">Blog</a></li>
@@ -86,6 +87,7 @@
             </section>
 
             <h1 class="products-main">Product List</h1>
+
             <section class="product-list">
                 <% if (products.length > 0) { %>
                     <% products.forEach(product => { %>
@@ -94,7 +96,11 @@
                             <h2><%= product.name %></h2>
                             <p><strong>Price: $<%= product.price %></strong></p>
                             <a href="/user/product/<%= product._id %>" class="btn">View Details</a>
-
+            
+                            <form action="/user/checkout/quick-buy/<%= product._id %>" method="POST" class="quick-buy-form">
+                                <button type="submit" class="btn">Buy Now</button>
+                            </form>
+            
                             <div class="product-actions">
                                 <form action="/user/add-to-cart/<%= product._id %>" method="POST" class="form-inline">
                                     <button type="submit" class="btn">Add to Cart</button>
@@ -109,6 +115,7 @@
                     <p>No products available at the moment.</p>
                 <% } %>
             </section>
+            
 
             <section class="featured-devices">
                 <div class="featured-content">
@@ -135,4 +142,8 @@
 </body>
 
 </html>
+
+
+
+
 

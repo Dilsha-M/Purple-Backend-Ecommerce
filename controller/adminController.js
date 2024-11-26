@@ -1,4 +1,6 @@
 const { Admin, Product, Category, SubCategory } = require('../models/adminModels')
+const { User, Cart, Wishlist, Order } = require('../models/usersModels.js');
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -34,10 +36,8 @@ const adminLogin = async (req, res) => {
     }
 }
 
-
 const dashboard = async (req, res) => {
     try {
-
         const totalProducts = await Product.countDocuments();
         const blockedProducts = await Product.countDocuments({ isBlocked: true });
         const activeProducts = await Product.countDocuments({ isBlocked: false });
@@ -45,18 +45,41 @@ const dashboard = async (req, res) => {
         const totalCategories = await Category.countDocuments();
         const totalSubcategories = await SubCategory.countDocuments();
 
+        // Order statistics
+        const totalOrders = await Order.countDocuments();
+        const pendingOrders = await Order.countDocuments({ status: 'Pending' });
+        const approvedOrders = await Order.countDocuments({ status: 'Approved' });
+        const deliveredOrders = await Order.countDocuments({ status: 'Delivered' });
+        const completedOrders = await Order.countDocuments({ status: 'Completed' });  // Ensure this line is here!
 
+        // Fetch total users and new users in the last 30 days
+        const totalUsers = await User.countDocuments();
+        const newUsers = await User.countDocuments({
+            createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Users created in the last 30 days
+        });
+
+        // Pass all the data to the view
         res.render('admin/dashboard', {
             totalProducts,
             blockedProducts,
             activeProducts,
             totalCategories,
-            totalSubcategories
+            totalSubcategories,
+            totalOrders,
+            pendingOrders,
+            approvedOrders,
+            deliveredOrders,
+            completedOrders,  // Pass completedOrders to the view
+            totalUsers,
+            newUsers // New users in the last 30 days
         });
     } catch (error) {
         res.status(500).send("Error loading dashboard");
     }
-}
+};
+
+
+
 
 
 const createProduct = async (req, res) => {
@@ -342,6 +365,73 @@ const deleteSubCategory = async (req, res) => {
 };
 
 
+const listOrders = async (req, res) => {
+    try {
+        const filterStatus = req.query.status || '';
+        const query = filterStatus ? { status: filterStatus } : {};
+        const orders = await Order.find(query).populate('user', 'name email').sort({ createdAt: -1 });
+
+        res.render('admin/orders', { orders, filterStatus });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching orders', error });
+    }
+};
+
+
+const changeOrderStatus = async (req, res) => {
+    const { orderId } = req.params;   
+    const { status } = req.body;      
+
+    try {
+        
+        const order = await Order.findById(orderId);
+        
+       
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+      
+        order.status = status;
+
+        
+        await order.save();
+
+     
+        res.redirect('/admin/orders');
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).json({ message: 'Error updating order status', error });
+    }
+};
+
+
+
+
+const viewOrderDetails = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = await Order.findById(orderId).populate('user items.product');
+        
+        if (!order) {
+            return res.status(404).send("Order not found");
+        }
+
+
+        let totalPrice = 0;
+        order.items.forEach(item => {
+            totalPrice += item.quantity * item.price; 
+        });
+
+       
+        order.totalPrice = totalPrice;
+
+        res.render('admin/orderDetails', { order });
+    } catch (error) {
+        console.error('Error viewing order details:', error);
+        res.status(500).send("Error viewing order details");
+    }
+};
 
 
 
@@ -364,6 +454,10 @@ module.exports = {
     updateSubCategory,
     deleteSubCategory,
     listSubCategories,
+
+    listOrders,
+    changeOrderStatus,
+    viewOrderDetails
 }
 
 

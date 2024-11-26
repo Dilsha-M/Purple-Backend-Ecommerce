@@ -1,80 +1,3 @@
-<!-- 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-
-<body>
-
-    <div class="sidebar">
-        <h1>Admin Dashboard</h1>
-        <div class="actions">
-            <a href="/admin/create">Create New Product</a>
-            <a href="/admin/products">View All Products</a>
-            <a href="/admin/create-category">Create New Category</a>
-            <a href="/admin/categories">View All Categories</a>
-            <a href="/admin/create-subcategory">Create New Subcategory</a>
-            <a href="/admin/logout">Logout</a>
-        </div>
-    </div>
-
- 
-    <div class="product-container">
-        <h2 class="page-heading">Product List</h2>
-        <ul class="product-list">
-
-            <% Products.forEach(product => { %>
-                
-                <li class="product-item">
-                    <strong>Name:</strong> <%= product.name %><br>
-                
-                    <strong>Category:</strong> <%= product.category ? product.category.name : 'Uncategorized' %><br>
-                   
-
-                    <strong>Price:</strong> $<%= product.price.toFixed(2) %><br>
-
-                    <strong>Description:</strong> <%= product.description %><br>
-
-                    <% if (product.image) { %>
-                        <img class="product-image" src="<%= product.image %>" alt="<%= product.name %>">
-                    <% } %>
-
-
-                <strong>Stock:</strong><%=product.stock %><br>
-
-                    <div class="product-actions">
-                        <a href="/admin/products/<%= product._id %>">Update</a>
-
-                        <form action="/admin/products/<%= product._id %>/block" method="POST" style="display:inline;">
-
-                            <% if (product.isBlocked) { %>
-                                <strong style="color: red;">Out of Stock</strong>
-                            <% }  %>
-
-                            <button type="submit">
-                                <%= product.isBlocked ? 'Unblock' : 'Block' %>
-                            </button>
-                        </form>
-
-                        <form action="/admin/product/delete/<%= product._id %>" method="post" style="display:inline;">
-                            <input type="submit" value="Delete">
-                        </form>
-                    </div>
-                </li>
-            <% }) %>
-        </ul>
-    </div>
-</body>
-
-</html> -->
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -91,6 +14,7 @@
     <div class="sidebar">
         <h1>Admin Dashboard</h1>
         <div class="actions">
+            <a href="/admin/dashboard">Go to Dashboard</a>
             <a href="/admin/create">Create New Product</a>
             <a href="/admin/products">View All Products</a>
             <a href="/admin/create-category">Create New Category</a>

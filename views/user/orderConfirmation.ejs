@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="order-container">
+        <div class="checkmark-container">
+            <span class="checkmark">&#10003;</span> 
+        </div>
+        
+        <h1 class="thank-you-message">Thank you for your order!</h1>
+        <p class="order-success">Your order has been successfully placed.</p>
+
+        <div class="order-details">
+            <h2>Order Details:</h2>
+            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p><strong>Total Price:</strong> <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.totalAmount) %></p>
+        </div>
+
+        <div class="order-timestamp">
+            <h3>Order Placed At:</h3>
+            <p><%= new Date(order.placedAt).toLocaleString() %></p>
+        </div>
+
+        <div class="shipping-billing-info">
+            <h3>Shipping Address:</h3>
+            <% if (order.shippingAddress) { %>
+                <p><%= order.shippingAddress.addressLine1 %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %>, <%= order.shippingAddress.postalCode %></p>
+            <% } else { %>
+                <p>Address not available.</p>
+            <% } %>
+
+            <h3>Billing Address:</h3>
+            <% if (order.billingAddress) { %>
+                <p><%= order.billingAddress.addressLine1 %>, <%= order.billingAddress.city %>, <%= order.billingAddress.state %>, <%= order.billingAddress.postalCode %></p>
+            <% } else { %>
+                <p>Address not available.</p>
+            <% } %>
+        </div>
+
+        <div class="payment-method">
+            <h3>Payment Method:</h3>
+            <p><%= order.paymentMethod %></p>
+        </div>
+
+        <div class="order-status">
+            <h3>Order Status:</h3>
+            <p><%= order.status %></p>
+            <% if (order.status === 'Pending') { %>
+                <p>We are currently processing your order. You will be notified once it's shipped.</p>
+            <% } %>
+        </div>
+
+        <h3>Items:</h3>
+        <ul class="items-list">
+            <% order.items.forEach(item => { %>
+                <li class="order-item">
+                    <% if (item.product.imageUrl) { %>
+                        <img class="product-image" src="<%= item.product.imageUrl %>" alt="<%= item.product.name %>" />
+                    <% } %>
+                    <span class="product-name"><%= item.product.name %></span> - 
+                    <span class="product-quantity"><%= item.quantity %></span> x 
+                    <span class="product-price">$<%= item.product.price %></span>
+                </li>
+            <% }) %>
+        </ul>
+
+        <div class="order-actions">
+            <a href="/user/orders" class="button">View Your Orders</a>
+            <a href="/user/products" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
+

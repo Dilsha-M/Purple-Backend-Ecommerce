@@ -4,7 +4,7 @@ const upload = require('../middleware/multer')
 const { Admin, Product, Category, SubCategory } = require('../models/adminModels');
 
 
-const { adminLogin, dashboard, createProduct, updateProduct, deleteProduct, listProducts, blockedProducts, logOut,listCategories,createCategory,updateCategory,deleteCategory,listSubCategories,createSubCategory,updateSubCategory,deleteSubCategory} = require('../controller/adminController');
+const { adminLogin, dashboard, createProduct, updateProduct, deleteProduct, listProducts, blockedProducts, logOut,listCategories,createCategory,updateCategory,deleteCategory,listSubCategories,createSubCategory,updateSubCategory,deleteSubCategory,listOrders,changeOrderStatus,viewOrderDetails} = require('../controller/adminController');
 
 
 
@@ -139,13 +139,24 @@ router.route('/create-subcategory')
     .post(updateSubCategory); 
 
 
-// router.route('/subcategories/:subcategoryId/delete')
-//     .post(deleteSubCategory);
 
 
 router.route('/subcategories/:subcategoryId/delete')
     .get(deleteSubCategory)
     .post(deleteSubCategory);
+
+
+    // Orders routes
+router.route('/orders')
+.get(listOrders);  // List all orders with optional status filter
+
+router.route('/orders/change-status/:orderId')
+.post(changeOrderStatus);  // Change the order status
+
+
+// View Order Details
+router.route('/orders/:orderId')
+    .get(viewOrderDetails);  // View details of a specific order
 
 
 module.exports = router

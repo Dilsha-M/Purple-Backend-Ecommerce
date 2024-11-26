@@ -1,5 +1,4 @@
 
-
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
@@ -15,6 +14,9 @@ const verifyJWT = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         req.user = decoded;  
+
+    
+
         next();
     } catch (error) {
         if (error.name === 'TokenExpiredError') {

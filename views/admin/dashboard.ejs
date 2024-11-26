@@ -1,16 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
-   
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> Optional for charts
 </head>
 
 <body>
-   
+
     <div class="sidebar">
         <h1>Admin Dashboard</h1>
         <div class="actions">
@@ -19,38 +19,68 @@
             <a href="/admin/create-category">Create New Category</a>
             <a href="/admin/categories">View All Categories</a>
             <a href="/admin/create-subcategory">Create New Subcategory</a>
-            <a href="/admin/subcategories">List Subcategories</a> 
+            <a href="/admin/subcategories">List Subcategories</a>
+            <a href="/admin/orders">View Orders</a>
             <a href="/admin/logout">Logout</a>
         </div>
     </div>
 
- 
     <div class="dashboard-content">
         <div class="stats">
             <div class="stat">
                 <h2>Total Products</h2>
-                <p><%= totalProducts %></p>
+                <p>
+                    <%= totalProducts %>
+                </p>
             </div>
             <div class="stat">
                 <h2>Blocked Products</h2>
-                <p><%= blockedProducts %></p>
+                <p>
+                    <%= blockedProducts %>
+                </p>
             </div>
             <div class="stat">
                 <h2>Active Products</h2>
-                <p><%= activeProducts %></p>
+                <p>
+                    <%= activeProducts %>
+                </p>
             </div>
         </div>
 
         <div class="stats">
             <div class="stat">
                 <h2>Total Categories</h2>
-                <p><%= totalCategories %></p>
+                <p>
+                    <%= totalCategories %>
+                </p>
             </div>
             <div class="stat">
                 <h2>Total Subcategories</h2>
-                <p><%= totalSubcategories %></p>
+                <p>
+                    <%= totalSubcategories %>
+                </p>
+            </div>
+
+
+            <div class="stat">
+                <h2>Total Orders</h2>
+                <p>
+                    <%= totalOrders %>
+                </p>
+            </div>
+            <div class="stat">
+                <h2>Pending Orders</h2>
+                <p>
+                    <%= pendingOrders %>
+                </p>
+            </div>
+            <div class="stat">
+                <h2>Completed Orders</h2>
+                <p>
+                    <%= completedOrders %>
+                </p>
             </div>
         </div>
-    </div>
 </body>
+
 </html>
