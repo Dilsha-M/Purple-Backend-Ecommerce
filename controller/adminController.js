@@ -147,7 +147,6 @@ const updateProduct = async (req, res) => {
 
         res.redirect('/admin/products');
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: 'Error updating product', error });
     }
 };
@@ -311,7 +310,6 @@ const createSubCategory = async (req, res) => {
 
         res.redirect('/admin/subcategories');
     } catch (error) {
-        console.log(error);
         res.status(500).json({ message: "Error creating subcategory", error });
     }
 };
@@ -340,7 +338,6 @@ const updateSubCategory = async (req, res) => {
 
         res.redirect('/admin/subcategories');
     } catch (error) {
-        console.log(error)
         res.status(500).json({ message: "Error updating subcategory", error });
     }
 };
@@ -379,28 +376,27 @@ const listOrders = async (req, res) => {
 
 
 const changeOrderStatus = async (req, res) => {
-    const { orderId } = req.params;   
-    const { status } = req.body;      
+    const { orderId } = req.params;
+    const { status } = req.body;
 
     try {
-        
+
         const order = await Order.findById(orderId);
-        
-       
+
+
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-      
+
         order.status = status;
 
-        
+
         await order.save();
 
-     
+
         res.redirect('/admin/orders');
     } catch (error) {
-        console.error('Error updating order status:', error);
         res.status(500).json({ message: 'Error updating order status', error });
     }
 };
@@ -412,7 +408,7 @@ const viewOrderDetails = async (req, res) => {
     try {
         const { orderId } = req.params;
         const order = await Order.findById(orderId).populate('user items.product');
-        
+
         if (!order) {
             return res.status(404).send("Order not found");
         }
@@ -420,15 +416,14 @@ const viewOrderDetails = async (req, res) => {
 
         let totalPrice = 0;
         order.items.forEach(item => {
-            totalPrice += item.quantity * item.price; 
+            totalPrice += item.quantity * item.price;
         });
 
-       
+
         order.totalPrice = totalPrice;
 
         res.render('admin/orderDetails', { order });
     } catch (error) {
-        console.error('Error viewing order details:', error);
         res.status(500).send("Error viewing order details");
     }
 };

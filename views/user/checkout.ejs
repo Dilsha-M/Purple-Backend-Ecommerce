@@ -1,18 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <link rel="stylesheet" href="/style.css">
+
 </head>
+
 <body>
     <div class="container checkout-container">
         <h1>Checkout</h1>
 
         <div class="cart-items">
-            <% if (cart.items && cart.items.length > 0) { %>
+            <% if (cart.items && cart.items.length> 0) { %>
                 <table>
                     <thead>
                         <tr>
@@ -24,13 +26,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% cart.items.forEach(item => { %>
+                        <% cart.items.forEach(item=> { %>
                             <tr>
                                 <td class="product-image-cell">
-                                    <img src="<%= item.product.image %>" alt="<%= item.product.name %>" class="product-image" />
+                                    <img src="<%= item.product.image %>" alt="<%= item.product.name %>"
+                                        class="product-image" />
                                 </td>
                                 <td class="product-name-cell">
-                                    <h4><%= item.product.name %></h4>
+                                    <h4>
+                                        <%= item.product.name %>
+                                    </h4>
                                 </td>
                                 <td class="quantity-cell">
                                     <%= item.quantity %>
@@ -42,51 +47,46 @@
                                     $<%= item.product.price * item.quantity %>
                                 </td>
                             </tr>
-                        <% }) %>
+                            <% }) %>
                     </tbody>
                 </table>
-                <p>Total Price: $<%= cart.totalPrice.toFixed(2) %></p>
-            <% } else { %>
-                <p>Your cart is empty.</p>
-            <% } %>
+                <p>Total Price: $<%= cart.totalPrice.toFixed(2) %>
+                </p>
+                <% } else { %>
+                    <p>Your cart is empty.</p>
+                    <% } %>
         </div>
 
- 
         <form action="/user/checkout/process" method="POST">
             <div class="addresses">
                 <h3>Select Shipping Address</h3>
-                <% if (addresses && addresses.length > 0) { %>
+                <% if (addresses && addresses.length> 0) { %>
                     <select name="shippingAddressId" required>
-                        <% addresses.forEach(address => { %>
+                        <% addresses.forEach(address=> { %>
                             <option value="<%= address._id %>">
-                                <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
+                                <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%=
+                                                address.postalCode %>
                             </option>
-                        <% }) %>
+                            <% }) %>
                     </select>
-                <% } else { %>
-                    <p>No addresses available. Please add one below.</p>
-                <% } %>
+                    <% } else { %>
+                        <p>No addresses available. Please add one below.</p>
+                        <% } %>
 
-                <h3>Select Billing Address</h3>
-                <select name="billingAddressId" required>
-                    <% addresses.forEach(address => { %>
-                        <option value="<%= address._id %>">
-                            <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
-                        </option>
-                    <% }) %>
-                </select>
+                            <h3>Select Billing Address</h3>
+                            <select name="billingAddressId" required>
+                                <% addresses.forEach(address=> { %>
+                                    <option value="<%= address._id %>">
+                                        <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%=
+                                                        address.postalCode %>
+                                    </option>
+                                    <% }) %>
+                            </select>
             </div>
 
-           
             <h3>Choose Payment Method</h3>
             <label>
-                <input type="radio" name="paymentMethod" value="creditCard" required> Credit Card
-            </label>
-            <label>
                 <input type="radio" name="paymentMethod" value="paypal" required> PayPal
-            </label>
-            <label>
-                <input type="radio" name="paymentMethod" value="bankTransfer" required> Bank Transfer
             </label>
             <label>
                 <input type="radio" name="paymentMethod" value="cashOnDelivery" required> Cash on Delivery
@@ -95,37 +95,94 @@
             <button type="submit">Place Order</button>
         </form>
 
-      
         <h3>Add New Address</h3>
-<form action="/user/checkout/add-address" method="POST">
-    <div class="form-group">
-        <input type="text" name="addressLine1" id="addressLine1" placeholder="Address Line 1" required>
+        <form action="/user/checkout/add-address" method="POST">
+            <div class="form-group">
+                <input type="text" name="addressLine1" id="addressLine1" placeholder="Address Line 1" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="addressLine2" id="addressLine2" placeholder="Address Line 2">
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="city" id="city" placeholder="City" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="state" id="state" placeholder="State" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="postalCode" id="postalCode" placeholder="Postal Code" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" name="country" id="country" placeholder="Country" required>
+            </div>
+
+            <button type="submit">Add Address</button>
+        </form>
+
+        <h3>Manage Existing Addresses</h3>
+        <% if (addresses && addresses.length> 0) { %>
+            <% addresses.forEach(address=> { %>
+                <div class="address">
+                    <p>
+                        <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode
+                                        %>
+                    </p>
+
+                    <!-- Edit Address Button -->
+                    <button id="edit-button-<%= address._id %>" onclick="toggleEditForm('<%= address._id %>')">Edit
+                        Address</button>
+
+                    <!-- Edit Address Form (Initially hidden) -->
+                    <form id="edit-form-<%= address._id %>" action="/user/checkout/edit-address/<%= address._id %>"
+                        method="POST" style="display: none;">
+                        <div class="form-group">
+                            <input type="text" name="addressLine1" value="<%= address.addressLine1 %>" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="addressLine2" value="<%= address.addressLine2 %>">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="city" value="<%= address.city %>" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="state" value="<%= address.state %>" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="postalCode" value="<%= address.postalCode %>" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="country" value="<%= address.country %>" required>
+                        </div>
+                        <button type="submit">Update Address</button>
+                    </form>
+
+                    <!-- Delete Address Form -->
+                    <form action="/user/checkout/delete-address/<%= address._id %>" method="POST"
+                        onsubmit="return confirm('Are you sure you want to delete this address?');">
+                        <button type="submit" class="delete-address-button">Delete Address</button>
+                    </form>
+                </div>
+                <% }) %>
+                    <% } else { %>
+                        <p>No saved addresses available to manage.</p>
+                        <% } %>
+
     </div>
 
-    <div class="form-group">
-        <input type="text" name="addressLine2" id="addressLine2" placeholder="Address Line 2">
-    </div>
+    <script>
+        function toggleEditForm(addressId) {
+            const form = document.getElementById('edit-form-' + addressId);
+            const button = document.getElementById('edit-button-' + addressId);
+            form.style.display = form.style.display === 'block' ? 'none' : 'block';
+            button.style.display = button.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
 
-    <div class="form-group">
-        <input type="text" name="city" id="city" placeholder="City" required>
-    </div>
-
-    <div class="form-group">
-        <input type="text" name="state" id="state" placeholder="State" required>
-    </div>
-
-    <div class="form-group">
-        <input type="text" name="postalCode" id="postalCode" placeholder="Postal Code" required>
-    </div>
-
-    <div class="form-group">
-        <input type="text" name="country" id="country" placeholder="Country" required>
-    </div>
-
-    <button type="submit">Add Address</button>
-</form>
-
-        
-    </div>
 </body>
+
 </html>

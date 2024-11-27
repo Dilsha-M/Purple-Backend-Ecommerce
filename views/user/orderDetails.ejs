@@ -24,13 +24,18 @@
             <ul>
                 <% order.items.forEach(item => { %>
                     <li>
-                        <%= item.product.name %> - <%= item.quantity %> x 
-                        <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.product.price) %>
+                        <div class="order-item">
+                            <img src="<%= item.product.image %>" alt="<%= item.product.name %>" class="order-item-image">
+                            <div class="order-item-info">
+                                <p><%= item.product.name %> - <%= item.quantity %> x 
+                                <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.product.price) %>
+                                </p>
+                            </div>
+                        </div>
                     </li>
                 <% }) %>
             </ul>
         </div>
-        
 
         <a href="/user/orders" class="button back-to-orders">Back to Orders</a>
     </div>

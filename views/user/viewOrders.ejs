@@ -13,32 +13,24 @@
         <h1 class="orders-title">Your Orders</h1>
 
         <% if (orders && orders.length > 0) { %>
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Total Price</th>
-                        <th>Status</th>
-                        <th>Placed At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% orders.forEach(order => { %>
-                        <tr>
-                            <td><%= order._id %></td>
-                            <td>
+            <div class="orders-list">
+                <% orders.forEach(order => { %>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Order ID: <%= order._id %></h3>
+                            <span class="order-price">
                                 <%= new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.totalAmount) %>
-                            </td>
-                            <td><%= order.status %></td>
-                            <td>
+                            </span>
+                        </div>
+
+                        <div class="order-details">
+                            <p><strong>Status:</strong> <%= order.status %></p>
+                            <p><strong>Placed At:</strong> 
                                 <% 
                                 const placedAt = new Date(order.placedAt);
-                                
                                 if (placedAt instanceof Date && !isNaN(placedAt)) { 
                                 %>
-                                    <!-- Format the date using toLocaleString() for a more readable format -->
-                                    <%= placedAt.toLocaleString() %> <!-- Example: "11/25/2024, 2:30:00 PM" -->
+                                    <%= placedAt.toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }) %>
                                 <% 
                                 } else { 
                                 %>
@@ -46,23 +38,29 @@
                                 <% 
                                 } 
                                 %>
-                            </td>
+                            </p>
+                        </div>
 
-                            <td>
-                                <div class="order-actions-container">
-                                    <a href="/user/orders/<%= order._id %>" class="button order-details-button">Order Details</a>
+                        <div class="order-images">
+                            <% order.items.forEach(item => { %>
+                                <% if (item.product && item.product.image) { %>
+                                    <img src="<%= item.product.image %>" alt="<%= item.product.name %>" class="order-product-image">
+                                <% } %>
+                            <% }) %>
+                        </div>
 
-                                    <% if (order.status === 'Pending') { %>
-                                        <form method="POST" action="/user/orders/cancel-order/<%= order._id %>">
-                                            <button type="submit" class="button cancel-order-button">Cancel Order</button>
-                                        </form>
-                                    <% } %>
-                                </div>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                        <div class="order-actions-container">
+                            <a href="/user/orders/<%= order._id %>" class="button order-details-button">Order Details</a>
+
+                            <% if (order.status === 'Pending') { %>
+                                <form method="POST" action="/user/orders/cancel-order/<%= order._id %>">
+                                    <button type="submit" class="button cancel-order-button">Cancel Order</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
         <% } else { %>
             <p class="no-orders">You have no orders yet.</p>
         <% } %>

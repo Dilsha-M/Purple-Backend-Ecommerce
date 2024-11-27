@@ -200,6 +200,7 @@ h1, h2, p {
 }
 
 
+
 /* Cart Table Styles */
 .cart-container {
     background-color: #fff;
@@ -714,6 +715,79 @@ form button:hover {
 }
 
 
+/* Edit Address Button */
+button[id^="edit-button-"] {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button[id^="edit-button-"]:hover {
+    background-color: #0056b3;
+}
+
+/* Edit Address Form */
+form[id^="edit-form-"] {
+    display: none; /* Initially hidden */
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 10px;
+}
+
+form[id^="edit-form-"] .form-group input {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+/* Button inside the Edit Address Form */
+form[id^="edit-form-"] button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+    padding: 12px;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+form[id^="edit-form-"] button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* Delete Address Button */
+form[id^="edit-form-"] + form button.delete-address-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+form[id^="edit-form-"] + form button.delete-address-button:hover {
+    background-color: #c82333;
+}
+
+/* Address container (before editing) */
+.address p {
+    font-size: 1.2rem;
+    margin: 5px 0;
+}
+
+
 @media screen and (max-width: 768px) {
     .checkout-container {
         padding: 20px;
@@ -755,6 +829,9 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color:rgb(100, 98, 98);
 }
+
+
+
 
 /* //orderconfirmation// */
 .order-container {
@@ -888,90 +965,121 @@ p {
 
 
 
-/* viewOrders Container */
+/* General Container for Orders */
 .orders-container {
     width: 90%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     border: 1px solid #ddd;
+    min-height: 100vh; /* Ensure container takes at least 100% of the viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Align content to take up full height */
 }
 
 /* Title Styling */
 .orders-title {
     text-align: center;
     font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333; /* Dark color for title */
-}
-
-/* Table Styling */
-.orders-table {
-    width: 100%;
-    border-collapse: collapse;
     margin-bottom: 30px;
-}
-
-.orders-table th,
-.orders-table td {
-    padding: 12px;
-    border: 1px solid #ddd;
-    text-align: left;
-    font-size: 1rem;
-}
-
-.orders-table th {
-    background-color: #000; /* Black background for header */
-    color: white;
+    color: #000;
     font-weight: bold;
 }
 
-.orders-table tr:nth-child(even) {
-    background-color: #f9f9f9; /* Light grey for even rows */
+/* Orders List (Scrollable View) */
+.orders-list {
+    flex-grow: 1; /* Allow the orders list to grow and fill remaining space */
+    overflow-y: auto; /* Enables vertical scrolling */
+    padding-right: 10px;
+    margin-bottom: 20px; /* Adds space between the orders and the "back to home" button */
 }
 
-.orders-table tr:hover {
-    background-color: #f1f1f1; /* Hover effect for rows */
+/* Order Card */
+.order-card {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
 }
 
-.orders-table td {
-    color: #333; /* Black text color for table data */
+/* Header of Each Order */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.order-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.order-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Order Details */
+.order-details p {
+    margin: 5px 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Styling for Product Images */
+.order-images {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.order-product-image {
+    max-width: 100px; /* Limit image size */
+    height: auto;
+    object-fit: contain;
+    border-radius: 5px;
+    display: block;
 }
 
 /* Button Styling for Actions */
-/* Ensure order details and cancel buttons are the same size */
 .order-actions-container {
     display: flex;
     gap: 10px;
-    justify-content: space-between;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .order-actions-container a,
 .order-actions-container button {
     padding: 12px 20px;
-    background-color: #d9534f;
+    background-color: #000;
     color: white;
     border-radius: 5px;
-    border: 1px solid #d9534f;
+    border: 1px solid #000;
     text-align: center;
     font-weight: bold;
-
-    flex: 1; /* Makes them flexible and equal width */
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
 }
 
 .order-actions-container a:hover,
 .order-actions-container button:hover {
-    background-color: #c9302c; /* Darker red on hover */
-    border: 1px solid #c9302c;
+    background-color: #555;
+    border: 1px solid #555;
+    transform: scale(1.05);
 }
 
 /* Back to Home Button */
 .button.back-to-home {
-    margin-top: 20px;
+    margin-top: 30px;
     display: inline-block;
     background-color: #000;
     color: white;
@@ -980,100 +1088,155 @@ p {
     border: 1px solid #000;
     text-align: center;
     transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .button.back-to-home:hover {
-    background-color: #444; /* Darker on hover */
-    border: 1px solid #444;
+    background-color: #333;
+    border: 1px solid #333;
+    transform: scale(1.05);
+}
+
+/* No Orders Message */
+.no-orders {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #333;
+    margin-top: 20px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .orders-title {
+        font-size: 1.5rem;
+    }
+
+    .orders-container {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .order-header h3 {
+        font-size: 1rem;
+    }
+
     .order-actions-container {
         flex-direction: column;
-        gap: 10px;  /* Stacks the buttons on smaller screens */
+        gap: 10px;
     }
-    
-    .button.back-to-home {
-        width: 100%; /* Make the back button take up full width on smaller screens */
+
+    .order-actions-container a,
+    .order-actions-container button {
+        width: 100%;
     }
 }
+
+
 
 
 
 /* Order Details Page */
 .order-details-page {
     width: 90%;
-    max-width: 1000px;
-    margin: 0 auto; /* Centering the container */
-    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
     background-color: #fff;
+    color: #000; /* Black text color */
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     border: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
+/* Title Styling */
 .order-details-title {
     text-align: center;
     font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333; /* Dark text color */
+    margin-bottom: 30px;
+    color: #000;
+    font-weight: bold;
 }
 
-.order-info,
-.order-items {
-    margin-bottom: 20px;
+/* Order Info Section */
+.order-info p {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
 }
 
-.order-info p,
+/* Order Items List */
 .order-items p {
-    font-size: 1.1rem;
-    margin: 8px 0;
-    color: #555; /* Lighter text color for readability */
-}
-
-.order-info strong,
-.order-items strong {
-    color: #333; /* Dark text color for emphasis */
+    font-size: 1.2rem;
+    margin-bottom: 15px;
 }
 
 .order-items ul {
-    list-style-type: none;
+    list-style: none;
     padding: 0;
 }
 
-.order-items li {
-    padding: 8px 0;
+.order-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
     border-bottom: 1px solid #ddd;
-    font-size: 1rem;
+    padding-bottom: 15px;
 }
 
-.order-items li:last-child {
-    border-bottom: none;
+.order-item-image {
+    width: 100px; /* Set the image width */
+    height: auto;
+    object-fit: contain;
+    margin-right: 20px;
+    border-radius: 5px;
 }
 
-/* Back to Orders Button */
+.order-item-info {
+    flex-grow: 1;
+}
+
+/* Button Styling for Back to Orders */
 .button.back-to-orders {
-    display: block;
-    width: 100%;
-    text-align: center;
-    background-color: #d9534f; /* Red background color */
+    display: inline-block;
+    margin-top: 30px;
+    background-color: #000;
     color: white;
-    font-size: 1rem;
     padding: 12px 25px;
     border-radius: 5px;
-    text-decoration: none;
-    border: 1px solid #d9534f; /* Same red border */
+    border: 1px solid #000;
+    text-align: center;
     transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .button.back-to-orders:hover {
-    background-color: #c9302c; /* Darker red shade for hover */
-    border: 1px solid #c9302c;
+    background-color: #333;
+    border: 1px solid #333;
+    transform: scale(1.05);
 }
 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .order-details-title {
+        font-size: 1.5rem;
+    }
+
+    .order-info p {
+        font-size: 1rem;
+    }
+
+    .order-items p {
+        font-size: 1rem;
+    }
+
+    .order-item-image {
+        width: 80px; /* Adjust image size on smaller screens */
+    }
+
+    .button.back-to-orders {
+        width: 100%;
+    }
+}
 
 

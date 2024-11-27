@@ -6,6 +6,7 @@ const dotenv = require("dotenv")
 dotenv.config() 
 const port = process.env.PORT;
 
+
 const connectDb = require('./db/db.js');
 const userRoutes = require('./routes/userRoutes.js');
 const adminRoutes=require('./routes/adminRoutes.js')
