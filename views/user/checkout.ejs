@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <link rel="stylesheet" href="/style.css">
-
 </head>
 
 <body>
@@ -14,7 +13,7 @@
         <h1>Checkout</h1>
 
         <div class="cart-items">
-            <% if (cart.items && cart.items.length> 0) { %>
+            <% if (cart.items && cart.items.length > 0) { %>
                 <table>
                     <thead>
                         <tr>
@@ -26,7 +25,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% cart.items.forEach(item=> { %>
+                        <% cart.items.forEach(item => { %>
                             <tr>
                                 <td class="product-image-cell">
                                     <img src="<%= item.product.image %>" alt="<%= item.product.name %>"
@@ -47,41 +46,29 @@
                                     $<%= item.product.price * item.quantity %>
                                 </td>
                             </tr>
-                            <% }) %>
+                        <% }) %>
                     </tbody>
                 </table>
-                <p>Total Price: $<%= cart.totalPrice.toFixed(2) %>
-                </p>
-                <% } else { %>
-                    <p>Your cart is empty.</p>
-                    <% } %>
+                <p>Total Price: $<%= cart.totalPrice.toFixed(2) %></p>
+            <% } else { %>
+                <p>Your cart is empty.</p>
+            <% } %>
         </div>
 
         <form action="/user/checkout/process" method="POST">
             <div class="addresses">
                 <h3>Select Shipping Address</h3>
-                <% if (addresses && addresses.length> 0) { %>
+                <% if (addresses && addresses.length > 0) { %>
                     <select name="shippingAddressId" required>
-                        <% addresses.forEach(address=> { %>
+                        <% addresses.forEach(address => { %>
                             <option value="<%= address._id %>">
-                                <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%=
-                                                address.postalCode %>
+                                <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
                             </option>
-                            <% }) %>
+                        <% }) %>
                     </select>
-                    <% } else { %>
-                        <p>No addresses available. Please add one below.</p>
-                        <% } %>
-
-                            <h3>Select Billing Address</h3>
-                            <select name="billingAddressId" required>
-                                <% addresses.forEach(address=> { %>
-                                    <option value="<%= address._id %>">
-                                        <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%=
-                                                        address.postalCode %>
-                                    </option>
-                                    <% }) %>
-                            </select>
+                <% } else { %>
+                    <p>No addresses available. Please add one below.</p>
+                <% } %>
             </div>
 
             <h3>Choose Payment Method</h3>
@@ -125,17 +112,15 @@
         </form>
 
         <h3>Manage Existing Addresses</h3>
-        <% if (addresses && addresses.length> 0) { %>
-            <% addresses.forEach(address=> { %>
+        <% if (addresses && addresses.length > 0) { %>
+            <% addresses.forEach(address => { %>
                 <div class="address">
                     <p>
-                        <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode
-                                        %>
+                        <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
                     </p>
 
                     <!-- Edit Address Button -->
-                    <button id="edit-button-<%= address._id %>" onclick="toggleEditForm('<%= address._id %>')">Edit
-                        Address</button>
+                    <button id="edit-button-<%= address._id %>" onclick="toggleEditForm('<%= address._id %>')">Edit Address</button>
 
                     <!-- Edit Address Form (Initially hidden) -->
                     <form id="edit-form-<%= address._id %>" action="/user/checkout/edit-address/<%= address._id %>"
@@ -167,10 +152,10 @@
                         <button type="submit" class="delete-address-button">Delete Address</button>
                     </form>
                 </div>
-                <% }) %>
-                    <% } else { %>
-                        <p>No saved addresses available to manage.</p>
-                        <% } %>
+            <% }) %>
+        <% } else { %>
+            <p>No saved addresses available to manage.</p>
+        <% } %>
 
     </div>
 

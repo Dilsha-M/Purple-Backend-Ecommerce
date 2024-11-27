@@ -675,14 +675,8 @@ const deleteAddress = async (req, res) => {
 
 
 const processCheckout = async (req, res) => {
-    try {
-        const { shippingAddressId, billingAddressId, paymentMethod } = req.body;
-
-
-        if (!shippingAddressId || !billingAddressId || !paymentMethod) {
-            return res.status(400).json({ error: "All fields must be provided." });
-        }
-
+    // try {
+        const { shippingAddressId, paymentMethod } = req.body;
 
         const user = await User.findById(req.user.id);
         const cart = await Cart.findOne({ user: req.user.id }).populate('items.product');
@@ -694,12 +688,6 @@ const processCheckout = async (req, res) => {
 
 
         const shippingAddress = user.addresses.id(shippingAddressId);
-        const billingAddress = user.addresses.id(billingAddressId);
-
-        if (!shippingAddress || !billingAddress) {
-            return res.status(400).json({ error: "Invalid addresses selected." });
-        }
-
 
         const validPaymentMethods = ['paypal', 'cashOnDelivery'];
         if (!validPaymentMethods.includes(paymentMethod)) {
@@ -730,7 +718,6 @@ const processCheckout = async (req, res) => {
                     price: item.product.price,
                 })),
                 shippingAddress: shippingAddress,
-                billingAddress: billingAddress,
                 totalAmount: totalAmount,
                 paymentMethod: paymentMethod,
                 status: 'Pending',
@@ -795,7 +782,6 @@ const processCheckout = async (req, res) => {
                                     price: item.product.price,
                                 })),
                                 shippingAddress: shippingAddress,
-                                billingAddress: billingAddress,
                                 totalAmount: totalAmount,
                                 paymentMethod: paymentMethod,
                                 status: 'Pending',
@@ -810,9 +796,9 @@ const processCheckout = async (req, res) => {
 
 
         }
-    } catch (error) {
-        res.status(500).json({ error: "Something went wrong." });
-    }
+    // } catch (error) {
+    //     res.status(500).json({ error: "Something went wrong." });
+    // }
 };
 
 
@@ -859,7 +845,6 @@ const orderConfirmation = async (req, res) => {
         const order = await Order.findOne({ user: userId }).sort({ createdAt: -1 })
             .populate('items.product')
             .populate('shippingAddress')
-            .populate('billingAddress');
 
         if (!order) {
             return res.status(404).send('Order not found');
@@ -881,8 +866,6 @@ const viewOrders = async (req, res) => {
             .sort({ createdAt: -1 })
             .populate('items.product')
             .populate('shippingAddress')
-            .populate('billingAddress');
-
             orders.forEach(order => {
                 if (order.placedAt && !(order.placedAt instanceof Date)) {
                     order.placedAt = new Date(order.placedAt);

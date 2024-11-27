@@ -151,10 +151,6 @@ const orderSchema = new mongoose.Schema({
     type: addressSchema,
     required: true
   },
-  billingAddress: {
-    type: addressSchema, 
-    required: true
-  },
   placedAt: {  
     type: Date,
     default: Date.now  
