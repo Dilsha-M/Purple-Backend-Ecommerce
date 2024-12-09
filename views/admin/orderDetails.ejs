@@ -13,22 +13,33 @@
 
         <div class="order-info">
             <p><strong>Order ID:</strong> <%= order._id %></p>
-            <p><strong>Customer:</strong> <%= order.user.name %> (<%= order.user.email %>)</p>
+            <p><strong>Customer Name:</strong> <%= order.user.username %></p>
+            <p><strong>Email:</strong> <%= order.user.email %></p>
+            <p><strong>Phone Number:</strong> <%= order.user.phone %></p> 
             <p><strong>Status:</strong> <%= order.status %></p>
         </div>
 
+        <h3>Shipping Address:</h3>
+        <p><strong>Address:</strong> <%= order.shippingAddress.addressLine1 %> <%= order.shippingAddress.addressLine2 ? order.shippingAddress.addressLine2 + ', ' : '' %>
+        <%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.postalCode %>, <%= order.shippingAddress.country %></p>
+
         <h3>Items:</h3>
         <ul class="order-items">
-            <% order.items.forEach(item => { %>
+            <% let totalAmount = 0; %>
+            <% order.items.forEach(item => { 
+                let itemTotal = item.quantity * item.price;
+                totalAmount += itemTotal;
+            %>
                 <li class="order-item">
-                    <%= item.product.name %> - <%= item.quantity %> x $<%= item.price.toFixed(2) %>
+                    <img src="<%= item.product.image[0] %>" alt="<%= item.product.name %>" class="order-item-image"/>
+                    <p><strong>Product Name:</strong> <%= item.product.name %></p>
+                    <p><strong>Price:</strong> $<%= item.price.toFixed(2) %> | <strong>Quantity:</strong> <%= item.quantity %> | <strong>Total:</strong> $<%= itemTotal.toFixed(2) %></p>
                 </li>
             <% }) %>
         </ul>
 
         <div class="total-price">
-            <!-- <h3>Total Price: $<%= order.totalPrice %></h3> -->
-            <h3>Total Price: $<%= order.totalPrice.toFixed(2) %></h3>
+            <h3><strong>Total Amount: $<%= totalAmount.toFixed(2) %></strong></h3>
         </div>
 
         <a href="/admin/orders" class="back-link">Back to Orders</a>

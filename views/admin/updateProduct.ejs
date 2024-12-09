@@ -1,43 +1,150 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Product</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <style>
+
+        .form-container {
+            width: 50%;
+            margin: 0 auto;
+            background-color: #fff;
+            /* White background for the form */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Heading */
+        .page-heading {
+            text-align: center;
+            color: #000;
+            /* Black text */
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        /* Form Group */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            color: #333;
+            /* Dark text for labels */
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        /* Textarea Styling */
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+            /* Allow resizing only vertically */
+        }
+
+        /* Button Styling */
+        .btn-submit {
+            background-color: #c82333;
+            /* Red button */
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            display: block;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #a21b2b;
+            /* Darker red on hover */
+        }
+
+        /* Form Control (inputs, textareas, file inputs) */
+        .form-control {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        /* File input button styling */
+        #image {
+            background-color: transparent;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%;
+                /* Make the form container full width on smaller screens */
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h2 class="page-heading">Update Product</h2>
 
-    <form action="/admin/products/<%= Product._id %>" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="_method" value="PUT">
+    <div class="form-container">
+        <h2 class="page-heading">Update Product</h2>
 
-        <label for="name">Product Name:</label>
-        <input type="text" name="name" id="name" value="<%= Product.name %>" required>
-        <br>
+        <form action="/admin/products/<%= Product._id %>" method="POST" enctype="multipart/form-data"
+            class="product-form">
+            <input type="hidden" name="_method" value="PUT">
 
-        <label for="category">Category:</label>
-        <input type="text" name="category" id="category" value="<%= Product.category %>" required>
-        <br>
+            <div class="form-group">
+                <label for="name">Product Name:</label>
+                <input type="text" name="name" id="name" value="<%= Product.name %>" required class="form-control">
+            </div>
 
-        <label for="description">Description:</label>
-        <textarea name="description" id="description" required><%= Product.description %></textarea>
-        <br>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" name="category" id="category" value="<%= Product.category %>" required
+                    class="form-control">
+            </div>
 
-        <label for="price">Price:</label>
-        <input type="number" name="price" id="price" value="<%= Product.price %>" required>
-        <br>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea name="description" id="description" required
+                    class="form-control"><%= Product.description %></textarea>
+            </div>
 
-        <label for="stock">Stock:</label>
-        <input type="number" name="stock" id="stock" value="<%= Product.stock %>" required>
-        <br>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" name="price" id="price" value="<%= Product.price %>" required class="form-control">
+            </div>
 
-        <label for="image">Image:</label>
-        <input type="file" name="image" id="image">
-        <br>
+            <div class="form-group">
+                <label for="stock">Stock:</label>
+                <input type="number" name="stock" id="stock" value="<%= Product.stock %>" required class="form-control">
+            </div>
 
-        <button type="submit">Update Product</button>
-    </form>
+            <div class="form-group">
+                <label for="image">Image:</label>
+                <input type="file" name="image" id="image" class="form-control">
+            </div>
+
+            <button type="submit" class="btn-submit">Update Product</button>
+        </form>
+    </div>
+
 </body>
+
 </html>

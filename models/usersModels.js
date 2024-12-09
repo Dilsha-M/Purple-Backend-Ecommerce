@@ -130,7 +130,13 @@ const orderSchema = new mongoose.Schema({
     price: {
       type: Number,
       required: true
-    }
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required:false,  // Should be 'required' if every product in an order has a category
+      trim: true
+    },
   }],
   totalAmount: {
     type: Number,
@@ -138,27 +144,53 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['paypal','cashOnDelivery'],
+    enum: ['paypal', 'cashOnDelivery'],
     required: true
   },
   status: {
     type: String,
-    enum:['Pending', 'Approved', 'Delivered', 'Cancelled'],
+    enum: ['Pending', 'Approved', 'Delivered', 'Cancelled'],
     default: 'Pending'
   },
-  
   shippingAddress: {
     type: addressSchema,
     required: true
   },
-  placedAt: {  
+  placedAt: {
     type: Date,
-    default: Date.now  
-  }
+    default: Date.now
+  },
 }, {
   timestamps: true
 });
 
+
+const reviewSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  rating: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
+  comment: {
+    type: String,
+    maxlength: 500
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
 
 
@@ -166,6 +198,6 @@ const User = mongoose.models.User || mongoose.model('User', userModels);
 const Cart = mongoose.model('Cart', cartSchema);
 const Wishlist = mongoose.model('Wishlist', wishlistSchema);
 const Order = mongoose.model('Order', orderSchema);
+const Review = mongoose.model('Review', reviewSchema)
 
-
-module.exports = { User, Cart, Wishlist, Order };
+module.exports = { User, Cart, Wishlist, Order, Review };

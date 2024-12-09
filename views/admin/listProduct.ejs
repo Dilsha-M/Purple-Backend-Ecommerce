@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,6 +9,7 @@
 </head>
 
 <body>
+
 
     <div class="sidebar">
         <h1>Admin Dashboard</h1>
@@ -24,8 +24,10 @@
         </div>
     </div>
 
+
     <div class="product-container">
         <h2 class="page-heading">Product List</h2>
+        
         <ul class="product-list">
             <% Products.forEach(product => { %>
                 <li class="product-item">
@@ -36,7 +38,7 @@
                             <img class="product-image" src="/images/placeholder.png" alt="Placeholder">
                         <% } %>
                     </div>
-                    <div>
+                    <div class="product-details">
                         <strong>Name:</strong> <%= product.name %><br>
                         <strong>Category:</strong> <%= product.category ? product.category.name : 'Uncategorized' %><br>
                         <strong>Price:</strong> $<%= product.price.toFixed(2) %><br>
@@ -44,19 +46,19 @@
                         <strong>Stock:</strong> <%= product.stock %><br>
 
                         <div class="product-actions">
-                            <a href="/admin/products/<%= product._id %>">Update</a>
+                            <a href="/admin/products/<%= product._id %>" class="update-btn">Update</a>
 
                             <form action="/admin/products/<%= product._id %>/block" method="POST" style="display:inline;">
                                 <% if (product.isBlocked) { %>
-                                    <strong style="color: red;">Out of Stock</strong>
+                                    <strong style="color: #c82333;">Out of Stock</strong>
                                 <% } %>
-                                <button type="submit">
+                                <button type="submit" class="block-btn">
                                     <%= product.isBlocked ? 'Unblock' : 'Block' %>
                                 </button>
                             </form>
 
                             <form action="/admin/product/delete/<%= product._id %>" method="post" style="display:inline;">
-                                <input type="submit" value="Delete">
+                                <input type="submit" class="delete-btn" value="Delete">
                             </form>
                         </div>
                     </div>
@@ -64,6 +66,8 @@
             <% }) %>
         </ul>
     </div>
+
 </body>
 
 </html>
+

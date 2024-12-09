@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router()
 
 
-const { registerUser, loginUser, forgetPassword, verifyOTP, resetPassword, listProducts, quickBuy, getProductDetails, addToCart, updateCart, getCart, removeFromCart, addToWishlist, removeFromWishlist, getWishlist, aboutPage, logoutUser, viewCheckout, processCheckout, capturePayment, addAddress, editAddress, deleteAddress, orderConfirmation, viewOrders, viewOrderDetails, cancelOrder, } = require('../controller/userController.js')
+const { registerUser, loginUser, forgetPassword, verifyOTP, resetPassword, listProducts, rateProduct, quickBuy, getProductDetails, addToCart, updateCart, getCart, removeFromCart, addToWishlist, removeFromWishlist, getWishlist, aboutPage, logoutUser, viewCheckout, processCheckout, capturePayment, addAddress, editAddress, deleteAddress, orderConfirmation, viewOrders, viewOrderDetails, cancelOrder,} = require('../controller/userController.js')
 
 const verifyJWT = require('../middleware/jwtMiddleware.js');
 const { Product } = require('../models/adminModels.js');
@@ -63,6 +63,11 @@ router.route('/resetpassword')
 
 router.route('/products')
     .get(verifyJWT, listProducts);
+
+
+// Correct the route definition to match the `orderId`
+router.route('/rate-product/:orderId')
+    .post(verifyJWT, rateProduct);
 
 
 
@@ -164,7 +169,7 @@ router.route('/orders/:id')
 
 
 
-router.post('/orders/cancel-order/:orderId', cancelOrder);
+router.post('/orders/:orderId/cancel', cancelOrder);
 
 
 

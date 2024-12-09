@@ -1,11 +1,8 @@
 const { Admin, Product, Category, SubCategory } = require('../models/adminModels')
-const { User, Cart, Wishlist, Order } = require('../models/usersModels.js');
+const { User, Cart, Wishlist, Order,Review } = require('../models/usersModels.js');
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
-
-
 
 const adminLogin = async (req, res) => {
     const { email, password } = req.body;
@@ -38,6 +35,7 @@ const adminLogin = async (req, res) => {
 
 const dashboard = async (req, res) => {
     try {
+       
         const totalProducts = await Product.countDocuments();
         const blockedProducts = await Product.countDocuments({ isBlocked: true });
         const activeProducts = await Product.countDocuments({ isBlocked: false });
@@ -45,20 +43,66 @@ const dashboard = async (req, res) => {
         const totalCategories = await Category.countDocuments();
         const totalSubcategories = await SubCategory.countDocuments();
 
-        // Order statistics
+       
         const totalOrders = await Order.countDocuments();
         const pendingOrders = await Order.countDocuments({ status: 'Pending' });
         const approvedOrders = await Order.countDocuments({ status: 'Approved' });
         const deliveredOrders = await Order.countDocuments({ status: 'Delivered' });
-        const completedOrders = await Order.countDocuments({ status: 'Completed' });  // Ensure this line is here!
 
-        // Fetch total users and new users in the last 30 days
-        const totalUsers = await User.countDocuments();
-        const newUsers = await User.countDocuments({
-            createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Users created in the last 30 days
+     
+        const onlinePayments = await Order.countDocuments({ paymentMethod: 'paypal' });
+        const offlinePayments = await Order.countDocuments({ paymentMethod: 'cashOnDelivery' });
+
+        const topSellingProducts = await Order.aggregate([
+            { $match: { status: 'Delivered' } },
+            { $unwind: '$items' }, 
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'items.product',
+                    foreignField: '_id', 
+                    as: 'productDetails' 
+                }
+            },
+            { $unwind: '$productDetails' }, 
+            {
+                $group: {
+                    _id: '$items.product', 
+                    totalSold: { $sum: '$items.quantity' }, 
+                    productName: { $first: '$productDetails.name' }, 
+                    price: { $first: '$productDetails.price' } 
+                }
+            },
+            { $sort: { totalSold: -1 } }, 
+            { $limit: 5 } 
+        ]);
+     
+        const topSellingProductsWithTotal = topSellingProducts.map(product => {
+            product.totalAmount = product.price * product.totalSold;
+            return product;
         });
 
-        // Pass all the data to the view
+        const monthlyIncome = await Order.aggregate([
+            { $match: { status: 'Delivered' } },
+            { $unwind: '$items' },
+            {
+                $group: {
+                    _id: {
+                        month: { $month: '$placedAt' },
+                        year: { $year: '$placedAt' }
+                    },
+                    totalIncome: { $sum: '$totalAmount' }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.month': 1 } }
+        ]);
+        
+        const profitGraphData = monthlyIncome.map(item => ({
+            month: item._id.month,
+            year: item._id.year,
+            profit: item.totalIncome 
+        }));
+        
         res.render('admin/dashboard', {
             totalProducts,
             blockedProducts,
@@ -69,17 +113,18 @@ const dashboard = async (req, res) => {
             pendingOrders,
             approvedOrders,
             deliveredOrders,
-            completedOrders,  // Pass completedOrders to the view
-            totalUsers,
-            newUsers // New users in the last 30 days
+            onlinePayments,
+            offlinePayments,
+            topSellingProducts: topSellingProductsWithTotal, 
+            monthlyIncome,
+            profitGraphData
         });
+        
+
     } catch (error) {
         res.status(500).send("Error loading dashboard");
     }
 };
-
-
-
 
 
 const createProduct = async (req, res) => {
@@ -108,8 +153,6 @@ const createProduct = async (req, res) => {
         res.status(500).json({ message: "Error creating product", error })
     }
 }
-
-
 
 
 const updateProduct = async (req, res) => {
@@ -154,7 +197,6 @@ const updateProduct = async (req, res) => {
 
 
 const deleteProduct = async (req, res) => {
-
     const { productId } = req.params
     try {
         const product = await Product.findByIdAndDelete(productId)
@@ -170,7 +212,6 @@ const deleteProduct = async (req, res) => {
 
 
 const listProducts = async (req, res) => {
-
     try {
         const Products = await Product.find().populate('category', 'name');
 
@@ -209,7 +250,6 @@ const logOut = (req, res) => {
 };
 
 
-
 const listCategories = async (req, res) => {
     try {
         const categories = await Category.find().populate('subCategories');
@@ -218,7 +258,6 @@ const listCategories = async (req, res) => {
         res.status(500).json({ message: 'Error fetching categories', error });
     }
 };
-
 
 const createCategory = async (req, res) => {
     const { name } = req.body;
@@ -231,23 +270,16 @@ const createCategory = async (req, res) => {
     }
 };
 
-
-
-
-
 const updateCategory = async (req, res) => {
     const { categoryId } = req.params;
     const { name } = req.body;
 
     try {
-
         const category = await Category.findByIdAndUpdate(categoryId, { name }, { new: true });
 
         if (!category) {
             return res.status(404).json({ message: "Category not found" });
         }
-
-
         res.redirect('/admin/categories');
     } catch (error) {
         res.status(500).json({ message: 'Error updating category', error });
@@ -264,9 +296,6 @@ const deleteCategory = async (req, res) => {
     }
 };
 
-
-
-
 const listSubCategories = async (req, res) => {
     try {
         const subCategories = await SubCategory.find()
@@ -278,7 +307,6 @@ const listSubCategories = async (req, res) => {
     }
 };
 
-
 const createSubCategory = async (req, res) => {
     const { name, categoryId } = req.body;
 
@@ -288,25 +316,19 @@ const createSubCategory = async (req, res) => {
             return res.status(400).json({ message: "Invalid or missing category ID" });
         }
 
-
         const category = await Category.findById(categoryId);
         if (!category) {
             return res.status(404).json({ message: "Category not found" });
         }
 
-
         const subCategory = new SubCategory({
             name,
             parentCategory: categoryId,
         });
-
-
         await subCategory.save();
-
 
         category.subCategories.push(subCategory._id);
         await category.save();
-
 
         res.redirect('/admin/subcategories');
     } catch (error) {
@@ -318,9 +340,7 @@ const createSubCategory = async (req, res) => {
 const updateSubCategory = async (req, res) => {
     const { subcategoryId } = req.params;
     const { name, categoryId } = req.body;
-
     try {
-
         const subCategory = await SubCategory.findById(subcategoryId).populate('parentCategory');
 
         if (!subCategory) {
@@ -342,10 +362,6 @@ const updateSubCategory = async (req, res) => {
     }
 };
 
-
-
-
-
 const deleteSubCategory = async (req, res) => {
     const { subcategoryId } = req.params;
 
@@ -361,39 +377,59 @@ const deleteSubCategory = async (req, res) => {
     }
 };
 
-
 const listOrders = async (req, res) => {
     try {
         const filterStatus = req.query.status || '';
-        const query = filterStatus ? { status: filterStatus } : {};
-        const orders = await Order.find(query).populate('user', 'name email').sort({ createdAt: -1 });
+        const filterPaymentMethod = req.query.paymentMethod || '';
+        const filterCategory = req.query.category || '';
 
-        res.render('admin/orders', { orders, filterStatus });
+        const query = {};
+
+        if (filterStatus) {
+            query.status = filterStatus;
+        }
+
+        if (filterPaymentMethod) {
+            query.paymentMethod = filterPaymentMethod;
+        }
+
+        if (filterCategory) {
+            query['items.category'] = filterCategory;  
+        }
+
+ 
+        const orders = await Order.find(query)
+            .populate('user', 'username email') 
+            .populate('items.product', 'name price') 
+            .populate('items.category', 'name')
+            .sort({ createdAt: -1 });
+
+      
+        const categories = await Category.find();
+
+        res.render('admin/orders', { 
+            orders, 
+            filterStatus, 
+            filterPaymentMethod, 
+            filterCategory,
+            categories 
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching orders', error });
     }
 };
 
-
 const changeOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
-
     try {
-
         const order = await Order.findById(orderId);
-
-
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-
         order.status = status;
-
-
         await order.save();
-
 
         res.redirect('/admin/orders');
     } catch (error) {
@@ -401,32 +437,55 @@ const changeOrderStatus = async (req, res) => {
     }
 };
 
-
-
-
 const viewOrderDetails = async (req, res) => {
     try {
         const { orderId } = req.params;
-        const order = await Order.findById(orderId).populate('user items.product');
+        const order = await Order.findById(orderId)
+            .populate({
+                path: 'user',
+                select: 'username email phone'  
+            })
+            .populate({
+                path: 'items.product',
+                select: 'name price image'  
+            });
 
         if (!order) {
             return res.status(404).send("Order not found");
         }
-
 
         let totalPrice = 0;
         order.items.forEach(item => {
             totalPrice += item.quantity * item.price;
         });
 
-
+    
         order.totalPrice = totalPrice;
 
+        
         res.render('admin/orderDetails', { order });
     } catch (error) {
+        console.error(error);
         res.status(500).send("Error viewing order details");
     }
 };
+
+
+
+
+const listReviews = async (req, res) => {
+    try {
+        const reviews = await Review.find()
+            .populate('product', 'name image')
+            .populate('user', 'username'); 
+
+        res.render('admin/reviews', { reviews });
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        res.status(500).send('Internal server error while fetching reviews');
+    }
+};
+
 
 
 
@@ -452,7 +511,8 @@ module.exports = {
 
     listOrders,
     changeOrderStatus,
-    viewOrderDetails
+    viewOrderDetails,
+    listReviews
 }
 
 

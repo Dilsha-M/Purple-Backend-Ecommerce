@@ -1,46 +1,103 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/style.css">
-    <title>Product Details</title>
-</head>
-<body>
-    <div class="product-details">
-        <h1><%= product.name %></h1>
-        <p><%= product.description %></p>
-        <p><strong>Price: $<%= product.price %></strong></p>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Product Details</title>
+     <link rel="stylesheet" href="/style.css">
 
-        <% if (product.image) { %>
-            <img src="<%= product.image %>" alt="<%= product.name %>" width="300" height="300">
-        <% } %>
-
-
-        <% if (product.stock > 0) { %>
-            <% if (product.stock < 5) { %>
-                <p style="color: red; font-weight: bold;">Limited Stock: <%= product.stock %> items left</p>
-            <% } else { %>
-                <p style="color: green; font-weight: bold;">In Stock: <%= product.stock %> items available</p>
-            <% } %>
-        <% } else { %>
-            <p style="color: red; font-weight: bold;">Out of Stock</p>
-        <% } %>
-        
+     <style>
+         .star-rating, .user-rating {
+             font-size: 20px;
+         }
+ 
+         .star-filled {
+             color: green;
+         }
+ 
+         .star-empty {
+             color: #ddd;
+         }
+ 
+         .product-rating-summary {
+             margin-top: 20px;
+         }
+ 
+         .rating-item {
+             margin-bottom: 20px;
+         }
+ 
+         .star-rating span, .user-rating span {
+             margin-right: 5px;
+         }
+     </style>
+ </head>
+ <body>
+     <div class="product-details">
+         <h1><%= product.name %></h1>
+         <p><%= product.description %></p>
+         <p><strong>Price: $<%= product.price %></strong></p>
+ 
+         <% if (product.image && product.image.length > 0) { %>
+             <img src="<%= product.image[0] %>" alt="<%= product.name %>" width="300" height="300">
+         <% } %>
+ 
+       
+         <div class="product-rating-summary">
+            <p><strong>Rate:</strong></p>
+            <div class="star-rating">
+                <% 
       
-        <form action="/user/add-to-cart/<%= product._id %>" method="POST">
-          
-            <input type="hidden" name="productId" value="<%= product._id %>">
-            <button type="submit" class="btn">Add to Cart</button>
-        </form>
+                    let totalStars = 0;
+                    let totalReviews = rating.length; 
+        
+       
+                    if (totalReviews > 0) {
+                        rating.forEach(review => {
+                            if (review.rating) {
+                                totalStars += review.rating;
+                            }
+                        });
+        
+                        var averageRating = (totalStars / totalReviews).toFixed(1); 
+                    } else {
+                        var averageRating = 0;
+                    }
+                %>
+                <% for (let i = 1; i <= 5; i++) { %>
+                    <span class="<%= i <= averageRating ? 'star-filled' : 'star-empty' %>">&#9733;</span>
+                <% } %>
+                <span> (<%= averageRating %> / 5)</span> 
+            </div>
+            <p>Total Reviews: <%= totalReviews %></p>
+        </div>
+        
+ 
+         <h2>Ratings & Comments:</h2>
+         <div class="ratings-list">
+             <% if (rating.length > 0) { %>
+                 <% rating.forEach(review => { %>
+                     <div class="rating-item">
+                      
+                         <div class="user-rating">
+                             <% for (let i = 1; i <= 5; i++) { %>
+                                 <span class="<%= i <= review.rating ? 'star-filled' : 'star-empty' %>">&#9733;</span>
+                             <% } %>
+                         </div>
+ 
+                    
+                         <p><strong>By:</strong> <%=review.username %></p>
 
-    
-        <form action="/user/add-to-wishlist/<%= product._id %>" method="POST">
-            <button type="submit" class="btn">Add to Wishlist</button>
-        </form>
-
-        <a href="/user/products" class="btn">Back to home page</a>
-    </div>
-</body>
-</html>
-
+                         <%= review.comment  %>
+                     </div>
+                 <% }) %>
+             <% } else { %>
+                 <p>No ratings or comments yet.</p>
+             <% } %>
+         </div>
+ 
+         <a href="/user/products" class="btn">Back to Products</a>
+     </div>
+ </body>
+ </html>
+ 

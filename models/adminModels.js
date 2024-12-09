@@ -29,18 +29,20 @@ const adminModels = new mongoose.Schema({
     timestamps: true
 })
 
+
+
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
         trim: true,
         minlength: 2,
-        maxlength: 100
+        maxlength: 400
     },
     description: {
         type: String,
         required: true,
-        maxlength: 500
+        maxlength: 2000,
     },
     price: {
         type: Number,
@@ -48,7 +50,6 @@ const productSchema = new mongoose.Schema({
         min: [0.01, 'Price must be greater than zero'],
         validate: {
             validator: function (value) {
-
                 return value <= 1000000;
             },
             message: 'Price should not exceed 1,000,000'
@@ -56,7 +57,7 @@ const productSchema = new mongoose.Schema({
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Category",
+        ref: "Category",
         required: true,
         trim: true
     },
@@ -73,11 +74,26 @@ const productSchema = new mongoose.Schema({
         required: true,
         min: 0,
         max: [9999, 'Stock cannot exceed 1000']
+    },
+    ratings: {
+        type: [Number],
+        default: []
+    },
+    averageRating: {
+        type: Number,
+        default: 0
+    },
 
-    }
+    reviews: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review'
+    }], 
 }, {
     timestamps: true
-})
+});
+
+
+
 
 
 const categorySchema = new mongoose.Schema({

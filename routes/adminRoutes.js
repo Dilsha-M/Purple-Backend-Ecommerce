@@ -4,7 +4,7 @@ const upload = require('../middleware/multer')
 const { Admin, Product, Category, SubCategory } = require('../models/adminModels');
 
 
-const { adminLogin, dashboard, createProduct, updateProduct, deleteProduct, listProducts, blockedProducts, logOut,listCategories,createCategory,updateCategory,deleteCategory,listSubCategories,createSubCategory,updateSubCategory,deleteSubCategory,listOrders,changeOrderStatus,viewOrderDetails} = require('../controller/adminController');
+const { adminLogin, dashboard, createProduct, updateProduct, deleteProduct, listProducts, blockedProducts, logOut, listCategories, createCategory, updateCategory, deleteCategory, listSubCategories, createSubCategory, updateSubCategory, deleteSubCategory, listOrders, changeOrderStatus, viewOrderDetails, listReviews } = require('../controller/adminController');
 
 
 
@@ -24,9 +24,9 @@ router.route('/dashboard')
 
 router.route('/create')
 
-    .get(async(req, res) => {
+    .get(async (req, res) => {
         const categories = await Category.find().populate('subCategories')
-        res.render('admin/createProduct',{categories})
+        res.render('admin/createProduct', { categories })
     })
     .post(upload.single('image'), (req, res) => {
         createProduct(req, res)
@@ -58,7 +58,7 @@ router.route('/products')
     })
 
 
-    
+
 router.route('/products/:productId/block')
     .post((req, res) => { blockedProducts(req, res) })
 
@@ -73,23 +73,23 @@ router.route('/categories')
     .get(async (req, res) => {
         const categories = await Category.find().populate('subCategories');
         res.render('admin/listCategories',
-             { categories });
+            { categories });
     })
     .post(createCategory);
 
 
 
-    router.route('/categories/:categoryId/edit')
+router.route('/categories/:categoryId/edit')
     .get(async (req, res) => {
         try {
-         
+
             const category = await Category.findById(req.params.categoryId);
             if (!category) {
                 return res.status(404).send('Category not found');
             }
-          
+
             res.render('admin/editCategory',
-                 { category });
+                { category });
         } catch (error) {
             res.status(500).send('Error fetching category for editing');
         }
@@ -97,13 +97,13 @@ router.route('/categories')
     .post(updateCategory);
 
 
-    router.route('/create-category')
+router.route('/create-category')
     .get((req, res) => {
-        res.render('admin/createCategory'); 
+        res.render('admin/createCategory');
     })
-    .post(createCategory); 
+    .post(createCategory);
 
-    router.route('/categories/:categoryId/delete')
+router.route('/categories/:categoryId/delete')
     .get(deleteCategory);
 
 
@@ -111,10 +111,10 @@ router.route('/categories')
 //subcategories//
 
 router.route('/subcategories')
-.get(async (req, res) => {
-    const subCategories = await SubCategory.find().populate('parentCategory', 'name');
-    res.render('admin/listSubCategories', { subCategories });
-});
+    .get(async (req, res) => {
+        const subCategories = await SubCategory.find().populate('parentCategory', 'name');
+        res.render('admin/listSubCategories', { subCategories });
+    });
 
 
 router.route('/create-subcategory')
@@ -125,18 +125,18 @@ router.route('/create-subcategory')
     .post(createSubCategory);
 
 
-    router.route('/update-subcategory/:subcategoryId')
+router.route('/update-subcategory/:subcategoryId')
     .get(async (req, res) => {
-        const { subcategoryId } = req.params;  
-        const subCategory = await SubCategory.findById(subcategoryId).populate('parentCategory'); 
-       
+        const { subcategoryId } = req.params;
+        const subCategory = await SubCategory.findById(subcategoryId).populate('parentCategory');
+
         const categories = await Category.find();
 
-     
+
         res.render('admin/updateSubCategory', { subCategory, categories });
     })
 
-    .post(updateSubCategory); 
+    .post(updateSubCategory);
 
 
 
@@ -146,17 +146,18 @@ router.route('/subcategories/:subcategoryId/delete')
     .post(deleteSubCategory);
 
 
-    // Orders routes
+
 router.route('/orders')
-.get(listOrders);  // List all orders with optional status filter
+    .get(listOrders);
 
 router.route('/orders/change-status/:orderId')
-.post(changeOrderStatus);  // Change the order status
+    .post(changeOrderStatus);
 
 
-// View Order Details
+
 router.route('/orders/:orderId')
-    .get(viewOrderDetails);  // View details of a specific order
+    .get(viewOrderDetails);
 
+router.use('/reviews', listReviews);
 
 module.exports = router

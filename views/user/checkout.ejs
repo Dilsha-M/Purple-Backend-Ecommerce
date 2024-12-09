@@ -119,10 +119,10 @@
                         <%= address.addressLine1 %>, <%= address.city %>, <%= address.state %>, <%= address.postalCode %>
                     </p>
 
-                    <!-- Edit Address Button -->
+                
                     <button id="edit-button-<%= address._id %>" onclick="toggleEditForm('<%= address._id %>')">Edit Address</button>
 
-                    <!-- Edit Address Form (Initially hidden) -->
+                   
                     <form id="edit-form-<%= address._id %>" action="/user/checkout/edit-address/<%= address._id %>"
                         method="POST" style="display: none;">
                         <div class="form-group">
@@ -146,7 +146,7 @@
                         <button type="submit">Update Address</button>
                     </form>
 
-                    <!-- Delete Address Form -->
+        
                     <form action="/user/checkout/delete-address/<%= address._id %>" method="POST"
                         onsubmit="return confirm('Are you sure you want to delete this address?');">
                         <button type="submit" class="delete-address-button">Delete Address</button>

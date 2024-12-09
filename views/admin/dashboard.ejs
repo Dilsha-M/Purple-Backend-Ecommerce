@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> Optional for charts
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
 
     <div class="sidebar">
@@ -21,11 +20,15 @@
             <a href="/admin/create-subcategory">Create New Subcategory</a>
             <a href="/admin/subcategories">List Subcategories</a>
             <a href="/admin/orders">View Orders</a>
+            <a href="/admin/reviews">Reviews</a>
             <a href="/admin/logout">Logout</a>
         </div>
     </div>
 
+    
     <div class="dashboard-content">
+
+     
         <div class="stats">
             <div class="stat">
                 <h2>Total Products</h2>
@@ -47,6 +50,7 @@
             </div>
         </div>
 
+       
         <div class="stats">
             <div class="stat">
                 <h2>Total Categories</h2>
@@ -60,8 +64,6 @@
                     <%= totalSubcategories %>
                 </p>
             </div>
-
-
             <div class="stat">
                 <h2>Total Orders</h2>
                 <p>
@@ -74,13 +76,138 @@
                     <%= pendingOrders %>
                 </p>
             </div>
+        </div>
+
+      
+        <div class="stats">
             <div class="stat">
-                <h2>Completed Orders</h2>
+                <h2>Online Payments (PayPal)</h2>
                 <p>
-                    <%= completedOrders %>
+                    <%= onlinePayments %>
+                </p>
+            </div>
+            <div class="stat">
+                <h2>Offline Payments (Cash on Delivery)</h2>
+                <p>
+                    <%= offlinePayments %>
                 </p>
             </div>
         </div>
-</body>
 
+      
+        <div class="top-selling-products">
+            <h2>Top Selling 5 Products</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Sold</th>
+                        <th>Price</th>
+                        <th>Total Sales Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% topSellingProducts.forEach(product=> { %>
+                        <tr>
+                            <td>
+                                <%= product.productName %>
+                            </td>
+                            <td>
+                                <%= product.totalSold %>
+                            </td>
+                            <td>$<%= product.price %>
+                            </td>
+                            <td>$<%= product.totalAmount %>
+                            </td> 
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+
+
+        <div class="monthly-income-report">
+            <h2>Monthly Income Report</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Total Income ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (monthlyIncome && monthlyIncome.length > 0) { %> 
+                        <% monthlyIncome.forEach(income => { %> 
+                            <tr>
+                                <td class="month"><%= income._id.month %></td> 
+                                <td class="month"><%= income._id.year %></td> 
+                                <td class="month">$<%= income.totalIncome %></td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %> 
+                        <tr>
+                            <td colspan="3">No data available</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    
+        <div class="profit-graph">
+            <h2>Profit Graph</h2>
+            <canvas id="profitGraph"></canvas>
+        </div>
+
+
+    </div>
+
+    <script>
+      var profitGraphData = <%- JSON.stringify(profitGraphData) %>;
+
+var labels = profitGraphData.map(function (data) {
+    return data.month + '-' + data.year; 
+});
+
+var profitValues = profitGraphData.map(function (data) {
+    return data.profit; 
+});
+
+var ctx = document.getElementById('profitGraph').getContext('2d');
+var profitData = {
+    labels: labels,
+    datasets: [{
+        label: 'Profit',
+        data: profitValues,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)', 
+        borderColor: 'rgba(75, 192, 192, 1)', 
+        borderWidth: 1,
+        borderRadius: 5 
+    }]
+};
+
+var config = {
+    type: 'bar', 
+    data: profitData,
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                beginAtZero: true
+            },
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+};
+
+var profitChart = new Chart(ctx, config);
+
+    </script>
+
+
+
+</body>
 </html>

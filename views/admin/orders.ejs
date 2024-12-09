@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,6 +12,8 @@
     <div class="admin-container">
         <h1>Manage Orders</h1>
 
+        <a href="/admin/dashboard" class="back-to-home">Back to Home</a>
+
         <form method="GET" action="/admin/orders">
             <label for="status">Filter by Status:</label>
             <select name="status" id="status">
@@ -22,6 +23,22 @@
                 <option value="Delivered" <%=filterStatus==='Delivered' ? 'selected' : '' %>>Delivered</option>
                 <option value="Cancelled" <%=filterStatus==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
             </select>
+
+            <label for="paymentMethod">Filter by Payment Method:</label>
+            <select name="paymentMethod" id="paymentMethod">
+                <option value="">All</option>
+                <option value="paypal" <%= filterPaymentMethod === 'paypal' ? 'selected' : '' %>>Online (PayPal)</option>
+                <option value="cashOnDelivery" <%= filterPaymentMethod === 'cashOnDelivery' ? 'selected' : '' %>>Offline (Cash on Delivery)</option>
+            </select>
+
+            <label for="category">Filter by Category:</label>
+            <select name="category" id="category">
+                <option value="">All Categories</option>
+                <% categories.forEach(category => { %>
+                    <option value="<%= category._id %>" <%= filterCategory === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                <% }) %>
+            </select>
+
             <button type="submit">Filter</button>
         </form>
 
@@ -31,32 +48,47 @@
                     <th>Order ID</th>
                     <th>User Details</th>
                     <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Category</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <% orders.forEach(order => { %>
-                    <tr>
-                        <td><%= order._id %></td>
-                        <td><%= order.user.name %> (<%= order.user.email %>)</td>
-                        <td><%= order.status %></td>
-                        <td>
-                            <a href="/admin/orders/<%= order._id %>">View Details</a> |
-                            <form method="POST" action="/admin/orders/change-status/<%= order._id %>">
-                                <select name="status">
-                                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                    <option value="Approved" <%= order.status === 'Approved' ? 'selected' : '' %>>Approved</option>
-                                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                </select>
-                                <button type="submit">Update Status</button>
-                            </form>
-                        </td>
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
 
+         <tbody>
+    <% orders.forEach(order => { %>
+        <tr>
+            <td><%= order._id %></td>
+            <td><%= order.user.username %> (<%= order.user.email %>)</td>
+            <td><%= order.status %></td>
+            <td><%= order.paymentMethod === 'paypal' ? 'Online (PayPal)' : 'Offline (Cash on Delivery)' %></td>
+            
+            <!-- Iterate over each item in the order to display the category -->
+            <td>
+                <% 
+                    // Combine categories for each item in the order
+                    let categories = order.items.map(item => item.category ? item.category.name : 'No Category');
+                    categories = [...new Set(categories)]; // Remove duplicates in case multiple products share the same category
+                %>
+                <%= categories.join(', ') %>
+            </td>
+
+            <td>
+                <a href="/admin/orders/<%= order._id %>">View Details</a> |
+                <form method="POST" action="/admin/orders/change-status/<%= order._id %>">
+                    <select name="status">
+                        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="Approved" <%= order.status === 'Approved' ? 'selected' : '' %>>Approved</option>
+                        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                        <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                    <button type="submit">Update Status</button>
+                </form>
+            </td>
+        </tr>
+    <% }); %>
+</tbody>
+
+        </table>
     </div>
 </body>
 

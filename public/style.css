@@ -200,6 +200,15 @@ h1, h2, p {
 }
 
 
+.star-rating span {
+    color: gold; /* Color for filled stars */
+}
+
+.star-empty {
+    color: lightgray; /* Color for empty stars */
+}
+
+
 
 /* Cart Table Styles */
 .cart-container {
@@ -1238,5 +1247,4 @@ p {
         width: 100%;
     }
 }
-
 

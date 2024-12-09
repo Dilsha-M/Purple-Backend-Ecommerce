@@ -1,5 +1,5 @@
-
-const { User, Cart, Wishlist, Order } = require('../models/usersModels.js');
+const mongoose = require('mongoose'); 
+const { User, Cart, Wishlist, Order,Review} = require('../models/usersModels.js');
 const { Product, Category } = require('../models/adminModels.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -7,6 +7,9 @@ const generateOTP = require("../middleware/otpmiddleware.js");
 const { sendSms } = require("../middleware/smsMiddleware");
 const paypal = require("../middleware/payPal.js")
 // const { checkout } = require('../routes/userRoutes.js');
+
+
+
 
 
 const registerUser = async (req, res) => {
@@ -187,9 +190,7 @@ const listProducts = async (req, res) => {
         const { minPrice, maxPrice, sort, category } = req.query;
         const userId = req.user?.id;
 
-
         let filter = { isBlocked: false };
-
 
         if (minPrice && maxPrice) {
             filter.price = { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) };
@@ -198,11 +199,9 @@ const listProducts = async (req, res) => {
             if (maxPrice) filter.price = { $lte: parseFloat(maxPrice) };
         }
 
-
         if (category && category !== '') {
             filter.category = category;
         }
-
 
         let sortOptions = {};
         if (sort) {
@@ -213,33 +212,34 @@ const listProducts = async (req, res) => {
             }
         }
 
-        const products = await Product.find(filter).populate('category').sort(sortOptions);
+        const products = await Product.find(filter).populate('category').sort(sortOptions).lean();
 
+        const productsWithRatings = await Promise.all(
+            products.map(async (product) => {
+                const reviews = await Review.find({ product: product._id });
+                const averageRating = reviews.length > 0
+                    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+                    : '0.0';
+
+                return { ...product, averageRating };
+            })
+        );
 
         const categories = await Category.find();
-
 
         let cartCount = 0;
         let wishlistCount = 0;
 
         if (userId) {
-
             const cart = await Cart.findOne({ user: userId }).populate('items.product');
-            cartCount = cart && cart.items
-                ? cart.items.filter(item => item.product).length
-                : 0;
-
+            cartCount = cart && cart.items ? cart.items.filter(item => item.product).length : 0;
 
             const wishlist = await Wishlist.findOne({ user: userId }).populate('items');
-            if (wishlist) {
-                wishlistCount = wishlist.items.length;
-            } else {
-                wishlistCount = 0;
-            }
+            wishlistCount = wishlist ? wishlist.items.length : 0;
         }
 
         res.render('user/listProduct', {
-            products,
+            products: productsWithRatings,
             minPrice: minPrice || '',
             maxPrice: maxPrice || '',
             sort: sort || '',
@@ -252,6 +252,62 @@ const listProducts = async (req, res) => {
         res.status(500).send('Error fetching products');
     }
 };
+
+
+
+const rateProduct = async (req, res) => {
+    const { orderId } = req.params;
+    const userId = req.user.id;
+
+    try {
+        if (!mongoose.Types.ObjectId.isValid(orderId)) {
+            return res.status(400).send('Invalid Order ID');
+        }
+
+        const order = await Order.findOne({ _id: orderId, user: userId }).populate('items.product');
+        if (!order) {
+            return res.status(404).send('Order not found or you do not have permission to rate this order');
+        }
+
+        for (const item of order.items) {
+            const productId = item.product._id.toString();
+            const ratingField = `rating_${productId}`;
+            const commentField = `comment_${productId}`;
+
+            const rating = req.body[ratingField];
+            const comment = req.body[commentField];
+
+            if (rating && comment) {
+                const review = new Review({
+                    product: productId,
+                    user: userId,
+                    rating: parseInt(rating, 10),
+                    comment: comment,
+                });
+
+                await review.save();
+
+                const product = await Product.findById(productId);
+                if (!product) {
+                    console.error('Product not found:', productId);
+                    continue;
+                }
+
+                product.reviews.push(review._id);
+                await product.save();
+            }
+        }
+
+        res.redirect('/user/orders');
+    } catch (error) {
+        console.error('Error submitting rating:', error);
+        res.status(500).send('Error submitting rating');
+    }
+};
+
+
+
+
 
 const quickBuy = async (req, res) => {
     const productId = req.params.id;
@@ -267,7 +323,7 @@ const quickBuy = async (req, res) => {
         const user = await User.findById(userId);
         const product = await Product.findById(productId);
 
-        // If the product is not found, handle the error
+
         if (!product) {
             return res.status(404).send('Product not found');
         }
@@ -282,7 +338,7 @@ const quickBuy = async (req, res) => {
             });
             await cart.save();
         } else {
-            // Add the product to the cart if it's not already there
+
             const productIndex = cart.items.findIndex(item => item.product.toString() === productId.toString());
             if (productIndex === -1) {
                 cart.items.push({ product: productId, quantity: 1 });
@@ -302,24 +358,46 @@ const quickBuy = async (req, res) => {
 
 
 
-
-
 const getProductDetails = async (req, res) => {
     const { id } = req.params;
-
     try {
         const product = await Product.findById(id);
+        const rating = await Review.aggregate([
+            {
+                $match: { product: new mongoose.Types.ObjectId(id) }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "user",
+                    foreignField: "_id",
+                    as: "UserDetails"
+                }
+            },
+            {
+                $unwind: "$UserDetails"
+            },
+            {
+                $project: {
+                    username: "$UserDetails.username",
+                    rating: 1,
+                    comment: 1
+                }
+            }
+        ]);
+
         if (!product) {
             return res.status(404).send('Product not found');
         }
 
-
-        res.render('user/viewProduct', { product });
+        res.render('user/viewProduct', { product, rating });
     } catch (error) {
-
-        res.status(500).send('Error fetching product details');
+        res.status(500).send('Error loading product');
     }
 };
+
+
+
 
 const addToCart = async (req, res) => {
     const { id } = req.params;
@@ -366,8 +444,6 @@ const addToCart = async (req, res) => {
         res.status(500).send("Error adding product to cart");
     }
 };
-
-
 
 
 const getCart = async (req, res) => {
@@ -603,21 +679,21 @@ const addAddress = async (req, res) => {
 
 
 const editAddress = async (req, res) => {
-    const userId = req.user.id; 
-    const { addressId } = req.params; 
-    const { addressLine1, addressLine2, city, state, postalCode, country } = req.body; 
+    const userId = req.user.id;
+    const { addressId } = req.params;
+    const { addressLine1, addressLine2, city, state, postalCode, country } = req.body;
 
     try {
- 
+
         const user = await User.findById(userId);
-     
+
         const address = user.addresses.id(addressId);
-        
+
         if (!address) {
             return res.status(404).json({ message: 'Address not found' });
         }
 
-       
+
         address.addressLine1 = addressLine1;
         address.addressLine2 = addressLine2 || address.addressLine2;
         address.city = city;
@@ -625,10 +701,10 @@ const editAddress = async (req, res) => {
         address.postalCode = postalCode;
         address.country = country;
 
-     
+
         await user.save();
 
-        res.redirect('/user/checkout'); 
+        res.redirect('/user/checkout');
     } catch (error) {
         res.status(500).json({ message: 'Error updating address' });
     }
@@ -636,13 +712,13 @@ const editAddress = async (req, res) => {
 
 
 const deleteAddress = async (req, res) => {
-  
+
     if (!req.user || !req.user.id) {
         return res.status(401).json({ error: 'User not authenticated' });
     }
 
     const userId = req.user.id;
-    const { addressId } = req.params; 
+    const { addressId } = req.params;
 
     try {
         const user = await User.findById(userId);
@@ -651,16 +727,16 @@ const deleteAddress = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-   
+
         const addressIndex = user.addresses.findIndex(address => address.id === addressId);
         if (addressIndex === -1) {
             return res.status(404).json({ error: 'Address not found' });
         }
 
-  
+
         user.addresses.pull({ _id: addressId });
 
-     
+
         await user.save();
 
         res.redirect('/user/checkout');
@@ -672,15 +748,17 @@ const deleteAddress = async (req, res) => {
 
 
 
-
-
 const processCheckout = async (req, res) => {
-    // try {
+    try {
         const { shippingAddressId, paymentMethod } = req.body;
 
         const user = await User.findById(req.user.id);
-        const cart = await Cart.findOne({ user: req.user.id }).populate('items.product');
-
+        const cart = await Cart.findOne({ user: req.user.id })
+        .populate({
+            path: 'items.product',
+            populate: { path: 'category', select: 'name' } 
+        });
+    
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ error: "Your cart is empty." });
@@ -716,6 +794,7 @@ const processCheckout = async (req, res) => {
                     product: item.product._id,
                     quantity: item.quantity,
                     price: item.product.price,
+                    category: item.product.category?._id,
                 })),
                 shippingAddress: shippingAddress,
                 totalAmount: totalAmount,
@@ -765,40 +844,48 @@ const processCheckout = async (req, res) => {
                 }
             };
 
-
-            paypal.payment.create(paymentPayload, async (error, payment) => {
-                if (error) {
-                    return res.status(500).json({ error: "Payment creation failed." });
-                } else {
-
-                    for (let i = 0; i < payment.links.length; i++) {
-                        if (payment.links[i].rel === 'approval_url') {
-
-                            const order = await Order.create({
-                                user: req.user.id,
-                                items: cart.items.map(item => ({
-                                    product: item.product._id,
-                                    quantity: item.quantity,
-                                    price: item.product.price,
-                                })),
-                                shippingAddress: shippingAddress,
-                                totalAmount: totalAmount,
-                                paymentMethod: paymentMethod,
-                                status: 'Pending',
-                                placedAt: new Date(),
-                            });
-
-                            return res.redirect(payment.links[i].href);
+                paypal.payment.create(paymentPayload, async (error, payment) => {
+                    if (error) {
+                        console.error("PayPal Error: ", error);
+                        return res.status(500).json({ error: "Payment creation failed." });
+                    } else {
+                
+                        let approvalUrl;
+                        for (let i = 0; i < payment.links.length; i++) {
+                            if (payment.links[i].rel === 'approval_url') {
+                                approvalUrl = payment.links[i].href;
+                                break;
+                            }
                         }
+                
+                        if (!approvalUrl) {
+                            return res.status(500).json({ error: "Approval URL not found." });
+                        }
+                
+                        const order = await Order.create({
+                            user: req.user.id,
+                            items: cart.items.map(item => ({
+                                product: item.product._id,
+                                quantity: item.quantity,
+                                price: item.product.price,
+                                category: item.product.category?._id,
+                            })),
+                            shippingAddress: shippingAddress,
+                            totalAmount: totalAmount,
+                            paymentMethod: paymentMethod,
+                            status: 'Pending',
+                            paymentId: payment.id, 
+                            placedAt: new Date(),
+                        });
+                
+                        return res.redirect(approvalUrl);
                     }
-                }
-            });
-
-
+                });
+                
         }
-    // } catch (error) {
-    //     res.status(500).json({ error: "Something went wrong." });
-    // }
+    } catch (error) {
+        res.status(500).json({ error: "Something went wrong." });
+    }
 };
 
 
@@ -811,31 +898,33 @@ const capturePayment = async (req, res) => {
             payer_id: payerId
         };
 
-
         paypal.payment.execute(paymentId, paymentDetails, async (error, payment) => {
             if (error) {
                 return res.status(500).json({ error: "Payment execution failed." });
             } else {
 
+             
                 const order = await Order.findOneAndUpdate(
-                    { paymentId: payment.id },
-                    { status: 'Paid' },
+                    { paymentId: paymentId }, 
+                    { status: 'Paid' }, 
                     { new: true }
                 );
 
+                if (!order) {
+                    return res.status(404).json({ error: "Order not found for this payment." });
+                }
 
-                await Cart.findOneAndUpdate({ user: req.user.id }, { items: [] });
+              
+                await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
 
-                res.render('/user/orderConfirmation');
+    
+                res.redirect('/user/order-confirmation');
             }
         });
     } catch (error) {
         res.status(500).json({ error: "Payment processing failed." });
     }
 };
-
-
-
 
 
 const orderConfirmation = async (req, res) => {
@@ -866,11 +955,11 @@ const viewOrders = async (req, res) => {
             .sort({ createdAt: -1 })
             .populate('items.product')
             .populate('shippingAddress')
-            orders.forEach(order => {
-                if (order.placedAt && !(order.placedAt instanceof Date)) {
-                    order.placedAt = new Date(order.placedAt);
-                }
-            });
+        orders.forEach(order => {
+            if (order.placedAt && !(order.placedAt instanceof Date)) {
+                order.placedAt = new Date(order.placedAt);
+            }
+        });
 
         res.render('user/viewOrders', { orders });
     } catch (error) {
@@ -900,35 +989,29 @@ const viewOrderDetails = async (req, res) => {
 };
 
 
-
-
-
 const cancelOrder = async (req, res) => {
     const { orderId } = req.params;
 
     try {
-
         const order = await Order.findById(orderId);
 
         if (!order) {
             return res.status(404).send('Order not found');
         }
 
-
         if (order.status !== 'Pending') {
             return res.status(400).send('You can only cancel orders that are "Pending"');
         }
 
-
         order.status = 'Cancelled';
         await order.save();
-
 
         res.redirect('/user/orders');
     } catch (error) {
         res.status(500).send('Error canceling order');
     }
 };
+
 
 
 
@@ -940,6 +1023,7 @@ module.exports = {
     resetPassword,
 
     listProducts,
+    rateProduct,
     quickBuy,
     getProductDetails,
     addToCart,
@@ -962,7 +1046,7 @@ module.exports = {
     orderConfirmation,
     viewOrders,
     viewOrderDetails,
-    cancelOrder
+    cancelOrder,
 };
 
 

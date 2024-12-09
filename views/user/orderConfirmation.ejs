@@ -33,13 +33,6 @@
             <% } else { %>
                 <p>Address not available.</p>
             <% } %>
-
-            <h3>Billing Address:</h3>
-            <% if (order.billingAddress) { %>
-                <p><%= order.billingAddress.addressLine1 %>, <%= order.billingAddress.city %>, <%= order.billingAddress.state %>, <%= order.billingAddress.postalCode %></p>
-            <% } else { %>
-                <p>Address not available.</p>
-            <% } %>
         </div>
 
         <div class="payment-method">

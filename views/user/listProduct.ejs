@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -91,11 +92,22 @@
             <section class="product-list">
                 <% if (products.length > 0) { %>
                     <% products.forEach(product => { %>
-                        
                         <div class="product-item">
                             <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
                             <h2><%= product.name %></h2>
                             <p><strong>Price: $<%= product.price %></strong></p>
+            
+                          
+                            <div class="product-rating">
+                                <p>Rating: <%= product.averageRating %>/5</p>
+                                <div class="star-rating">
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <span style="color: <%= i <= Math.round(product.averageRating) ? 'gold' : 'lightgray' %>;">&#9733;</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                            
+            
                             <a href="/user/product/<%= product._id %>" class="btn">View Details</a>
             
                             <form action="/user/checkout/quick-buy/<%= product._id %>" method="POST" class="quick-buy-form">
@@ -130,7 +142,6 @@
                     </div>
                 </div>
             </section>
-            
 
         </div>
     </main>
@@ -143,8 +154,3 @@
 </body>
 
 </html>
-
-
-
-
-

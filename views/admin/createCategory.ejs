@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,11 +5,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Category</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Body and General Layout */
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #000;
+            color: #fff;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar h1 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .sidebar .actions a {
+            display: block;
+            text-decoration: none;
+            color: #fff;
+            margin: 10px 0;
+            padding: 10px;
+            background: #333;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .sidebar .actions a:hover {
+            background: #444;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            margin-left: 270px;
+            padding: 20px;
+            flex-grow: 1;
+            background-color: #f4f4f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dashboard Content Styling */
+        .dashboard-content {
+            flex-grow: 1;
+            padding-left: 30px;
+        }
+
+        /* Form Container */
+        .form-container {
+            width: 50%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2 {
+            text-align: center;
+            color: #000;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        /* Form Controls - Reusable Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        /* Error Message */
+        .error-message {
+            color: red;
+            display: none;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            background-color: #c82333;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            display: block;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #a21b2b;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
 
     <div class="sidebar">
         <h1>Admin Dashboard</h1>
@@ -24,18 +157,17 @@
             <a href="/admin/logout">Logout</a>
         </div>
     </div>
-
-
     <div class="dashboard-content">
         <div class="form-container">
             <h2>Create Category</h2>
             <form action="/admin/create-category" method="POST" onsubmit="return validateForm()">
-                <label for="name">Category Name</label>
-                <input type="text" name="name" id="name" required>
-                <span id="name-error" class="error-message">Category name is required</span>
-                <br>
+                <div class="form-group">
+                    <label for="name">Category Name</label>
+                    <input type="text" name="name" id="name" required class="form-control">
+                    <span id="name-error" class="error-message">Category name is required</span>
+                </div>
 
-                <button type="submit">Create Category</button>
+                <button type="submit" class="btn-submit">Create Category</button>
             </form>
         </div>
     </div>

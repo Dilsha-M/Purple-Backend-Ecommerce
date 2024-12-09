@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Reviews</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+    
+        .admin-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+    
+        .back-to-home {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: #d9534f;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    
+        .back-to-home:hover {
+            background-color: #c13c32;
+        }
+    
+        .reviews-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+    
+        .reviews-table thead {
+            background-color: #333;
+            color: #fff;
+        }
+    
+        .reviews-table th, 
+        .reviews-table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+    
+        .reviews-table th {
+            font-size: 14px;
+        }
+    
+        .reviews-table td {
+            font-size: 13px;
+            vertical-align: middle;
+        }
+    
+        .product-image {
+            width: 50px;
+            /* height: 100px; */
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            position: relative;
+            margin: auto;
+            max-width: 90%;
+            width: 80%;
+            height: auto;
+        }
+
+        .modal img {
+            width: 100%;
+            height: auto;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #d9534f;
+        }
+        
+        @media (max-width: 768px) {
+            .reviews-table th, .reviews-table td {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .product-image {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Manage Reviews</h1>
+        <a href="/admin/dashboard" class="back-to-home">Back to Dashboard</a>
+
+        <table class="reviews-table">
+            <thead>
+                <tr>
+                    <th>Review ID</th>
+                    <th>Product</th>
+                    <th>Product Image</th>
+                    <th>User</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% reviews.forEach(review => { %>
+                    <tr>
+                        <td><%= review._id %></td>
+                        <td><%= review.product ? review.product.name : 'Product Deleted' %></td>
+                        <td>
+                            <% if (review.product && review.product.image && review.product.image.length > 0) { %>
+                                <img src="<%= review.product.image[0] %>" alt="Product Image" class="product-image" onclick="openModal('<%= review.product.image[0] %>')">
+                            <% } else { %>
+                                No Image
+                            <% } %>
+                        </td>
+                        <td><%= review.user ? review.user.username : 'No Username' %></td>
+                        <td>
+                            <% for (let i = 1; i <= 5; i++) { %>
+                                <span class="<%= i <= review.rating ? 'star-filled' : 'star-empty' %>">&#9733;</span>
+                            <% } %>
+                        </td>
+                        <td><%= review.comment %></td>
+                        <td><%= new Date(review.createdAt).toLocaleDateString() %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for full image -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Full Image">
+        </div>
+    </div>
+
+    <script>
+        function openModal(imageSrc) {
+            var modal = document.getElementById("imageModal");
+            var modalImage = document.getElementById("modalImage");
+            modal.style.display = "block";
+            modalImage.src = imageSrc;
+        }
+
+        function closeModal() {
+            var modal = document.getElementById("imageModal");
+            modal.style.display = "none";
+        }
+    </script>
+</body>
+</html>
