@@ -59,13 +59,13 @@ router.route('/resetpassword')
         resetPassword(req, res)
     })
 
-//////////////////
+
 
 router.route('/products')
     .get(verifyJWT, listProducts);
 
 
-// Correct the route definition to match the `orderId`
+
 router.route('/rate-product/:orderId')
     .post(verifyJWT, rateProduct);
 
@@ -130,7 +130,6 @@ router.get('/logout', logoutUser);
 
 
 
-// View Cart and Checkout
 router.route('/checkout')
     .get(verifyJWT, viewCheckout);
 

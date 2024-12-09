@@ -67,7 +67,7 @@ router.route('/logout')
     .get(logOut);
 
 
-//categoeries//
+
 
 router.route('/categories')
     .get(async (req, res) => {
@@ -108,7 +108,6 @@ router.route('/categories/:categoryId/delete')
 
 
 
-//subcategories//
 
 router.route('/subcategories')
     .get(async (req, res) => {

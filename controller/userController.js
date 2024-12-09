@@ -1,5 +1,5 @@
-const mongoose = require('mongoose'); 
-const { User, Cart, Wishlist, Order,Review} = require('../models/usersModels.js');
+const mongoose = require('mongoose');
+const { User, Cart, Wishlist, Order, Review } = require('../models/usersModels.js');
 const { Product, Category } = require('../models/adminModels.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -754,11 +754,11 @@ const processCheckout = async (req, res) => {
 
         const user = await User.findById(req.user.id);
         const cart = await Cart.findOne({ user: req.user.id })
-        .populate({
-            path: 'items.product',
-            populate: { path: 'category', select: 'name' } 
-        });
-    
+            .populate({
+                path: 'items.product',
+                populate: { path: 'category', select: 'name' }
+            });
+
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ error: "Your cart is empty." });
@@ -844,44 +844,44 @@ const processCheckout = async (req, res) => {
                 }
             };
 
-                paypal.payment.create(paymentPayload, async (error, payment) => {
-                    if (error) {
-                        console.error("PayPal Error: ", error);
-                        return res.status(500).json({ error: "Payment creation failed." });
-                    } else {
-                
-                        let approvalUrl;
-                        for (let i = 0; i < payment.links.length; i++) {
-                            if (payment.links[i].rel === 'approval_url') {
-                                approvalUrl = payment.links[i].href;
-                                break;
-                            }
+            paypal.payment.create(paymentPayload, async (error, payment) => {
+                if (error) {
+                    console.error("PayPal Error: ", error);
+                    return res.status(500).json({ error: "Payment creation failed." });
+                } else {
+
+                    let approvalUrl;
+                    for (let i = 0; i < payment.links.length; i++) {
+                        if (payment.links[i].rel === 'approval_url') {
+                            approvalUrl = payment.links[i].href;
+                            break;
                         }
-                
-                        if (!approvalUrl) {
-                            return res.status(500).json({ error: "Approval URL not found." });
-                        }
-                
-                        const order = await Order.create({
-                            user: req.user.id,
-                            items: cart.items.map(item => ({
-                                product: item.product._id,
-                                quantity: item.quantity,
-                                price: item.product.price,
-                                category: item.product.category?._id,
-                            })),
-                            shippingAddress: shippingAddress,
-                            totalAmount: totalAmount,
-                            paymentMethod: paymentMethod,
-                            status: 'Pending',
-                            paymentId: payment.id, 
-                            placedAt: new Date(),
-                        });
-                
-                        return res.redirect(approvalUrl);
                     }
-                });
-                
+
+                    if (!approvalUrl) {
+                        return res.status(500).json({ error: "Approval URL not found." });
+                    }
+
+                    const order = await Order.create({
+                        user: req.user.id,
+                        items: cart.items.map(item => ({
+                            product: item.product._id,
+                            quantity: item.quantity,
+                            price: item.product.price,
+                            category: item.product.category?._id,
+                        })),
+                        shippingAddress: shippingAddress,
+                        totalAmount: totalAmount,
+                        paymentMethod: paymentMethod,
+                        status: 'Pending',
+                        paymentId: payment.id,
+                        placedAt: new Date(),
+                    });
+
+                    return res.redirect(approvalUrl);
+                }
+            });
+
         }
     } catch (error) {
         res.status(500).json({ error: "Something went wrong." });
@@ -903,10 +903,10 @@ const capturePayment = async (req, res) => {
                 return res.status(500).json({ error: "Payment execution failed." });
             } else {
 
-             
+
                 const order = await Order.findOneAndUpdate(
-                    { paymentId: paymentId }, 
-                    { status: 'Paid' }, 
+                    { paymentId: paymentId },
+                    { status: 'Paid' },
                     { new: true }
                 );
 
@@ -914,10 +914,10 @@ const capturePayment = async (req, res) => {
                     return res.status(404).json({ error: "Order not found for this payment." });
                 }
 
-              
+
                 await Cart.findOneAndUpdate({ user: req.user._id }, { items: [] });
 
-    
+
                 res.redirect('/user/order-confirmation');
             }
         });

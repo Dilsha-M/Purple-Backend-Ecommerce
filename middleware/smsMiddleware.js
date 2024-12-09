@@ -42,7 +42,7 @@ const sendSms = async (to) => {
         console.log('OTP sent successfully:', sentMessage.sid);
 
        
-        return otp; // Return the OTP for use in further steps (e.g., verification)
+        return otp;
     } catch (error) {
         console.error('Error sending message:', error);
         throw new Error('Error sending SMS');

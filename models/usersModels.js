@@ -134,7 +134,7 @@ const orderSchema = new mongoose.Schema({
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
-      required:false,  // Should be 'required' if every product in an order has a category
+      required:false,  
       trim: true
     },
   }],
